@@ -1,0 +1,151 @@
+﻿<Window x:Class="FilterTreeView.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:FilterTreeView.ViewModels"
+        xmlns:views="clr-namespace:FilterTreeView.Views"
+        xmlns:behav="clr-namespace:FilterTreeView.Behaviors"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="525"
+        xmlns:conv="clr-namespace:FilterTreeView.Converters"
+        Icon="{StaticResource AppImage}"
+        >
+    <Grid>
+        <Grid.Resources>
+            <conv:LocationTypeToImageConverter x:Key="LocationTypeToImageConverter" />
+            <conv:BoolToVisibilityConverter x:Key="boolToVisibilityConverter" />
+
+            <conv:BoolToVisibilityConverter x:Key="boolToHiddenVisibilityConverter"
+                                            False="Hidden" True="Visible" />
+
+            <conv:InverseBooleanConverter  x:Key="InverseBooleanConverter" />
+            <Style x:Key="TreeViewStyle">
+                <Setter Property="TreeView.Background" Value="Transparent"/>
+                <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
+                <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
+                <Setter Property="TreeView.SnapsToDevicePixels" Value="True" />
+                <Setter Property="TreeView.OverridesDefaultStyle" Value="True" />
+                <Setter Property="ItemsControl.ItemsPanel">
+                    <Setter.Value>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel IsItemsHost="True"/>
+                        </ItemsPanelTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="TreeView.Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TreeView">
+                            <ScrollViewer Focusable="False" CanContentScroll="True" Padding="3">
+                                <ItemsPresenter HorizontalAlignment="Stretch"/>
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0"
+              >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Margin="3"
+                     Text="{Binding SearchString}"
+                     x:Name="FilterTextBox"
+                     behav:TextChangedCommand.ChangedCommand="{Binding SearchCommand}"
+                />
+                
+                <Button Content="Search"
+                    Grid.Column="1"
+                    Command="{Binding SearchCommand}"
+                    CommandParameter="{Binding ElementName=FilterTextBox,Path=Text}"
+                    IsEnabled="{Binding IsProcessing, Mode=OneWay,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource InverseBooleanConverter}}"
+                    Margin="3" />
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <CheckBox Content="String is contained"
+                          IsChecked="{Binding IsStringContainedSearchOption}"
+                          Margin="3"
+                          />
+            </Grid>
+        </Grid>
+
+        <ProgressBar Height="6" Grid.Row="1" IsIndeterminate="True"
+                     Visibility="{Binding IsProcessing,Mode=OneWay,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource boolToHiddenVisibilityConverter}}" />
+        
+        <TreeView Grid.Row="2"
+                  Margin="3,0,3,3"
+                  VerticalAlignment="Stretch"
+                  ItemsSource="{Binding CountryRootItems,Mode=OneWay}"
+                  >
+            <TreeView.Resources>
+                <!-- Use a proxy to bind items to root properties of this collection -->
+                <views:BindingProxy x:Key="DataContextProxy"  Data="{Binding}" />
+            </TreeView.Resources>
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type vm:MetaLocationViewModel}"
+                                          ItemsSource="{Binding Children,Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" >
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="{Binding TypeOfLocation,Converter={StaticResource LocationTypeToImageConverter}}"
+                               Width="16"/>
+
+                        <TextBlock Text="{Binding LocalName}" Margin="5,0,0,0" >
+                            <TextBlock.ToolTip>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right">ID:</TextBlock>
+                                    <TextBlock Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" Text="{Binding ID}"/>
+
+                                    <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right">Latitude:</TextBlock>
+                                    <TextBlock Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Text="{Binding Latitude}"/>
+
+                                    <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right">Longitude:</TextBlock>
+                                    <TextBlock Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" Text="{Binding Longitude}"/>
+                                </Grid>
+                            </TextBlock.ToolTip>
+                            </TextBlock>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                    <Setter Property="behav:TreeViewItemExpanded.Command" Value="{Binding Path=Data.ExpandCommand, Source={StaticResource DataContextProxy}}" />
+                    <Setter Property="IsExpanded" Value="{Binding IsItemExpanded, Mode=TwoWay}" />
+                    <Setter Property="Visibility" Value="{Binding IsItemVisible, Mode=OneWay, Converter={StaticResource boolToVisibilityConverter}}" />
+                </Style>
+            </TreeView.ItemContainerStyle>
+        </TreeView>
+
+        <Grid Grid.Row="3" Margin="3">
+            <TextBlock>Matches Found: <TextBlock Text="{Binding CountSearchMatches, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" />
+            </TextBlock>
+        </Grid>
+    </Grid>
+</Window>
