@@ -68,6 +68,7 @@
                 <TextBox Grid.Column="0" Margin="3"
                      Text="{Binding SearchString}"
                      x:Name="FilterTextBox"
+                     ToolTip="Enter at least 3 chracters"
                      behav:TextChangedCommand.ChangedCommand="{Binding SearchCommand}"
                 />
                 

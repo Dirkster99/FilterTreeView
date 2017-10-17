@@ -9,6 +9,11 @@
     using System.Windows;
     using System.Windows.Threading;
 
+    /// <summary>
+    /// Implements a set of methods to search and filter through backup nodes
+    /// and make them visible for binding only if the node is regarded as a match
+    /// against the search criteria.
+    /// </summary>
     internal class BackupNodeSearch
     {
         private static DispatcherPriority _ChildrenEditPrio = DispatcherPriority.DataBind;
