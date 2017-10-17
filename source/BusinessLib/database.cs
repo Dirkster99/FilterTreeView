@@ -35,51 +35,54 @@
             , string citiesFileName
             )
         {
-            // Load all regions into a dicationary collection
-            Dictionary<string, MetaLocationModel> isoDicRegions = await
-                IsoDicFromZipXml(pathZipFile, regionsFileName);
-
-            // Load cities (that belong to 1 region) into a dictionary collection
-            List<MetaLocationModel> isoCities
-               = await FromZipXml(pathZipFile, citiesFileName);
-
-            // Insert each city into its region
-            foreach (var cityItem in isoCities)
+            return await Task.Run<List<MetaLocationModel>>(async () =>
             {
-                int isoCountryLength = cityItem.ISO.IndexOf('-');
-                int isoRegionLength = cityItem.ISO.IndexOf('-', isoCountryLength + 1);
-                string isoRegion = cityItem.ISO.Substring(0, isoRegionLength);
+                 // Load all regions into a dicationary collection
+                 Dictionary<string, MetaLocationModel> isoDicRegions = await
+                      IsoDicFromZipXml(pathZipFile, regionsFileName);
 
-                MetaLocationModel regionItem;
-                isoDicRegions.TryGetValue(isoRegion, out regionItem);
+                 // Load cities (that belong to 1 region) into a dictionary collection
+                 List<MetaLocationModel> isoCities
+                     = await FromZipXml(pathZipFile, citiesFileName);
 
-                if (regionItem != null)
-                {
-                    cityItem.SetParent(regionItem);
-                    regionItem.ChildrenAdd(cityItem);
-                }
-            }
+                 // Insert each city into its region
+                 foreach (var cityItem in isoCities)
+                 {
+                     int isoCountryLength = cityItem.ISO.IndexOf('-');
+                     int isoRegionLength = cityItem.ISO.IndexOf('-', isoCountryLength + 1);
+                     string isoRegion = cityItem.ISO.Substring(0, isoRegionLength);
 
-            // Load all countries (about 220 world-wide) into a collection
-            List<MetaLocationModel> isoCountries = null;
-            isoCountries = await FromZipXml(pathZipFile, countriesFileName);
+                     MetaLocationModel regionItem;
+                     isoDicRegions.TryGetValue(isoRegion, out regionItem);
 
-            // Insert all regions (and cities below them) into their countries
-            foreach (var regionItem in isoDicRegions.Values)
-            {
-                int isoCountryLength = regionItem.ISO.IndexOf('-');
-                string isoCountry = regionItem.ISO.Substring(0, isoCountryLength);
+                     if (regionItem != null)
+                     {
+                         cityItem.SetParent(regionItem);
+                         regionItem.ChildrenAdd(cityItem);
+                     }
+                 }
 
-                var countryItem = isoCountries.Where(x => x.ISO.Equals(isoCountry, StringComparison.InvariantCulture)).FirstOrDefault();
+                 // Load all countries (about 220 world-wide) into a collection
+                 List<MetaLocationModel> isoCountries = null;
+                 isoCountries = await FromZipXml(pathZipFile, countriesFileName);
 
-                if (countryItem != null)
-                {
-                    regionItem.SetParent(countryItem);
-                    countryItem.ChildrenAdd(regionItem);
-                }
-            }
+                 // Insert all regions (and cities below them) into their countries
+                 foreach (var regionItem in isoDicRegions.Values)
+                 {
+                     int isoCountryLength = regionItem.ISO.IndexOf('-');
+                     string isoCountry = regionItem.ISO.Substring(0, isoCountryLength);
 
-            return isoCountries;
+                     var countryItem = isoCountries.Where(x => x.ISO.Equals(isoCountry, StringComparison.InvariantCulture)).FirstOrDefault();
+
+                     if (countryItem != null)
+                     {
+                         regionItem.SetParent(countryItem);
+                         countryItem.ChildrenAdd(regionItem);
+                     }
+                 }
+
+                 return isoCountries;
+             });
         }
 
         #region Xml Reader Methods
@@ -154,6 +157,12 @@
             });
         }
 
+        /// <summary>
+        /// Reads all Meta Location Models directly from a Zipped Xml file.
+        /// </summary>
+        /// <param name="zipFileFullPath"></param>
+        /// <param name="targetFileName"></param>
+        /// <returns></returns>
         public static async Task<Dictionary<string, MetaLocationModel>> IsoDicFromZipXml(
               string zipFileFullPath
             , string targetFileName)

@@ -6,19 +6,23 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using System.Windows;
+    using System.Windows.Threading;
 
     internal class MetaLocationViewModel : Base.BaseViewModel
     {
         #region fields
+        private static DispatcherPriority _ChildrenEditPrio = DispatcherPriority.DataBind;
+
         private static readonly MetaLocationViewModel DummyChild = new MetaLocationViewModel();
 
-        private readonly BusinessLib.Models.MetaLocationModel _LocationModel = null;
         private bool _IsItemVisible;
         private bool _IsItemExpanded;
         private List<MetaLocationViewModel> _BackUpNodes = null;
 
         private readonly ObservableCollection<MetaLocationViewModel> _Children = null;
         private MatchType _Match;
+        private string _LocalName;
         #endregion fields
 
         #region constructors
@@ -33,20 +37,19 @@
         {
             Parent = parent;
 
-            // Traverse down the model tree to create viewmodels with
-            // the same parent - child relationship structure
-            _BackUpNodes = new List<MetaLocationViewModel>(
-                            (from child in locationModel.Children
-                             select new MetaLocationViewModel(child, this))
-                            .ToList());
+            _LocalName = locationModel.LocalName;
+            ID = locationModel.ID;
+            Latitude = locationModel.Geo_lat;
+            Longitude = locationModel.Geo_lng;
+            TypeOfLocation = locationModel.Type;
 
-            _LocationModel = locationModel;
+            ChildrenClear(false);  // Lazy Load Children !!!
         }
 
         /// <summary>
         /// Class Constructor
         /// </summary>
-        public MetaLocationViewModel()
+        protected MetaLocationViewModel()
         {
             _IsItemVisible = true;
             _IsItemExpanded = false;
@@ -56,8 +59,6 @@
 
             _Match = MatchType.NoMatch;
             Parent = null;
-
-            ChildrenClear(false);  // Lazy Load Children !!!
         }
         #endregion constructors
 
@@ -107,70 +108,28 @@
         {
             get
             {
-                if (_LocationModel == null)
-                    return string.Empty;
-
-                return _LocationModel.LocalName;
+                return _LocalName;
             }
             set
             {
-                if (_LocationModel == null)
-                    return;
-
-                if (_LocationModel.LocalName != value)
+                if (_LocalName != value)
                 {
-                    _LocationModel.LocalName = value;
+                    _LocalName = value;
                     NotifyPropertyChanged(() => LocalName);
                 }
             }
         }
 
-        public int ID
-        {
-            get
-            {
-                if (_LocationModel == null)
-                    return -1;
+        public int ID { get; }
 
-                return _LocationModel.ID;
-            }
-        }
+        public double Latitude { get; }
 
-        public double Latitude
-        {
-            get
-            {
-                if (_LocationModel == null)
-                    return -1;
-
-                return _LocationModel.Geo_lat;
-            }
-        }
-
-        public double Longitude
-        {
-            get
-            {
-                if (_LocationModel == null)
-                    return -1;
-
-                return _LocationModel.Geo_lat;
-            }
-        }
+        public double Longitude { get; }
 
         /// <summary>
         /// Gets the type of location of this object.
         /// </summary>
-        public LocationType TypeOfLocation
-        {
-            get
-            {
-                if (_LocationModel == null)
-                    return LocationType.Unknown;
-
-                return _LocationModel.Type;
-            }
-        }
+        public LocationType TypeOfLocation { get; }
 
         public IEnumerable<MetaLocationViewModel> BackUpNodes
         {
@@ -187,9 +146,7 @@
                 return _Children;
             }
         }
-        #endregion properties
 
-        #region methods
         public int ChildrenCount => _BackUpNodes.Count;
 
         public virtual bool HasDummyChild
@@ -207,6 +164,48 @@
 
                 return false;
             }
+        }
+        #endregion properties
+
+        #region methods
+        /// <summary>
+        /// Convert a Model into a ViewModel using
+        /// a LevelOrderTraversal Algorithm
+        /// </summary>
+        /// <param name="srcRoot"></param>
+        public static MetaLocationViewModel GetViewModelFromModel(MetaLocationModel srcRoot)
+        {
+            if (srcRoot == null)
+                return null;
+
+            MetaLocationViewModel dstRoot = new MetaLocationViewModel(srcRoot, null);
+
+            Queue<MetaLocationModel> srcQueue = new Queue<MetaLocationModel>();
+            Queue<MetaLocationViewModel> dstQueue = new Queue<MetaLocationViewModel>();
+
+            srcQueue.Enqueue(srcRoot);
+            dstQueue.Enqueue(dstRoot);
+
+            while (srcQueue.Count() > 0)
+            {
+                MetaLocationModel srcCurrent = srcQueue.Dequeue();
+                MetaLocationViewModel dstCurrent = dstQueue.Dequeue();
+
+                ////Console.WriteLine(string.Format("{0,4} - {1}"
+                ////                  , iLevel, current.GetPath()));
+
+                foreach (var item in srcCurrent.Children)
+                {
+                    var dstVM = new MetaLocationViewModel(item, dstCurrent);
+
+                    dstCurrent.ChildrenAddBackupNodes(dstVM);
+
+                    srcQueue.Enqueue(item);
+                    dstQueue.Enqueue(dstVM);
+                }
+            }
+
+            return dstRoot;
         }
 
         /// <summary>
@@ -239,17 +238,24 @@
         public void ChildrenAdd(MetaLocationViewModel child, bool bAddBackup = true)
         {
             if (HasDummyChild == true)
-                _Children.Clear();
+            {
+                Application.Current.Dispatcher.Invoke(() => { _Children.Clear(); }, _ChildrenEditPrio);
+            }
 
-            _Children.Add(child);
+            Application.Current.Dispatcher.Invoke(() => { _Children.Add(child); }, _ChildrenEditPrio);
 
             if (bAddBackup == true)
                 _BackUpNodes.Add(child);
         }
 
+        public void ChildrenAddBackupNodes(MetaLocationViewModel child)
+        {
+            _BackUpNodes.Add(child);
+        }
+
         public void ChildrenRemove(MetaLocationViewModel child, bool bRemoveBackup = true)
         {
-            _Children.Remove(child);
+            Application.Current.Dispatcher.Invoke(() => { _Children.Remove(child); }, _ChildrenEditPrio);
 
             if (bRemoveBackup == true)
                 _BackUpNodes.Remove(child);
@@ -258,10 +264,13 @@
         public void ChildrenClear(bool bClearBackup = true
                                 , bool bAddDummyChild = true)
         {
-            _Children.Clear();
+            Application.Current.Dispatcher.Invoke(() => { _Children.Clear(); }, _ChildrenEditPrio);
 
-            if (bAddDummyChild == true)
-                _Children.Add(DummyChild);
+            // Cities do not have children so we need no dummy child here
+            if (bAddDummyChild == true && TypeOfLocation != LocationType.City)
+            {
+                Application.Current.Dispatcher.Invoke(() => { _Children.Add(DummyChild); }, _ChildrenEditPrio);
+            }
 
             if (bClearBackup == true)
                 _BackUpNodes.Clear();
@@ -283,21 +292,11 @@
 
             // Traverse the list of parents backwards and
             // add each child to the path
-            if (_LocationModel != null)
+            while (current != null)
             {
-                while (current != null)
-                {
-                    result = "/" + _LocationModel.LocalName + result;
+                result = "/" + LocalName + result;
 
-                    current = current.Parent;
-                }
-            }
-            else
-            {
-                result = "???";
-
-                if (this.Equals(MetaLocationViewModel.DummyChild) == true)
-                    result = "DummyChild";
+                current = current.Parent;
             }
 
             return result;

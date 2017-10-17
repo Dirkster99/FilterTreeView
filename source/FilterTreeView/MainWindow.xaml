@@ -144,7 +144,9 @@
         </TreeView>
 
         <Grid Grid.Row="3" Margin="3">
-            <TextBlock>Matches Found: <TextBlock Text="{Binding CountSearchMatches, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock>
+<TextBlock Text="{Binding StatusStringResult, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" />
+<TextBlock Text="{Binding CountSearchMatches, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" /> Matches Found
             </TextBlock>
         </Grid>
     </Grid>

@@ -6,7 +6,6 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
@@ -16,17 +15,20 @@
     internal class AppViewModel : Base.BaseViewModel
     {
         #region fields
-        private ObservableCollection<MetaLocationViewModel> _CountyRootItems = new ObservableCollection<MetaLocationViewModel>();
-        private readonly IList<MetaLocationViewModel> _backUpCountryRoots = new List<MetaLocationViewModel>();
-
-        private ICommand _SearchCommand;
+        private readonly ObservableCollection<MetaLocationViewModel> _CountryRootItems = null;
+        private readonly IList<MetaLocationViewModel> _backUpCountryRoots = null;
 
         private bool _IsStringContainedSearchOption;
         private int _CountSearchMatches;
         private bool _IsProcessing;
-        private string _SearchString;
 
+        private ICommand _SearchCommand;
         private ICommand _ExpandCommand;
+
+        private List<string> _Queue = new List<string>();
+        private static SemaphoreSlim SlowStuffSemaphore = new SemaphoreSlim(1, 1);
+        private string _StatusStringResult;
+        private string _SearchString;
         #endregion fields
 
         #region constructors
@@ -35,10 +37,13 @@
         /// </summary>
         public AppViewModel()
         {
-            _IsProcessing = false;
             _SearchString = "Washington";
+            _IsProcessing = false;
             _CountSearchMatches = 0;
             _IsStringContainedSearchOption = true;
+
+            _CountryRootItems = new ObservableCollection<MetaLocationViewModel>();
+            _backUpCountryRoots = new List<MetaLocationViewModel>(400);
         }
         #endregion constructors
 
@@ -50,7 +55,7 @@
         {
             get
             {
-                return _CountyRootItems;
+                return _CountryRootItems;
             }
         }
 
@@ -72,7 +77,7 @@
         }
 
         /// <summary>
-        /// Gets a search string to match in the tree view.
+        /// Gets the input string from search textbox control.
         /// </summary>
         public string SearchString
         {
@@ -82,7 +87,23 @@
                 if (_SearchString != value)
                 {
                     _SearchString = value;
-                    NotifyPropertyChanged(() => IsProcessing);
+                    NotifyPropertyChanged(() => SearchString);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the search string that is synchronized with the results from the search algorithm.
+        /// </summary>
+        public string StatusStringResult
+        {
+            get { return _StatusStringResult; }
+            private set
+            {
+                if (_StatusStringResult != value)
+                {
+                    _StatusStringResult = value;
+                    NotifyPropertyChanged(() => StatusStringResult);
                 }
             }
         }
@@ -132,14 +153,14 @@
             {
                 if (_SearchCommand == null)
                 {
-                    _SearchCommand = new RelayCommand<object>((p) =>
+                    _SearchCommand = new RelayCommand<object>(async (p) =>
                     {
                         string findThis = p as string;
 
                         if (findThis == null)
                             return;
 
-                        SearchCommand_ExecutedAsync(findThis);
+                        await SearchCommand_ExecutedAsync(findThis);
                     },
                     (p =>
                     {
@@ -155,7 +176,9 @@
             }
         }
 
-
+        /// <summary>
+        /// Gets a command that expands the item given in the command parameter.
+        /// </summary>
         public ICommand ExpandCommand
         {
             get
@@ -186,54 +209,89 @@
         public async Task LoadSampleDataAsync()
         {
             IsProcessing = true;
-
+            StatusStringResult = "Loading Data... please wait.";
             try
             {
                 var isoCountries = await BusinessLib.Database.LoadData
-                    (@".\Resources\lokasyon.zip"
-                    , "countries.xml", "regions.xml", "cities.xml");
+                    (@".\Resources\lokasyon.zip", "countries.xml", "regions.xml", "cities.xml");
 
                 foreach (var item in isoCountries)
                 {
-                    var vmItem = new MetaLocationViewModel(item, null);
-                    _backUpCountryRoots.Add(vmItem);
+                    await Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                     {
+                        //var vmItem = new MetaLocationViewModel(item, null);
+                        var vmItem = MetaLocationViewModel.GetViewModelFromModel(item);
 
-                    // Add with low UI priority to make adding a smooth experience
-                    _CountyRootItems.Add(vmItem);
+                         _backUpCountryRoots.Add(vmItem);
+                        //_CountryRootItems.Add(vmItem);
+
+                    }), DispatcherPriority.ContextIdle);
                 }
 
-                return;
+                StatusStringResult = string.Format("Searching... '{0}'", SearchString);
+                await SearchCommand_ExecutedAsync(SearchString);
             }
             finally
             {
                 IsProcessing = false;
-                SearchCommand_ExecutedAsync(SearchString);
             }
         }
 
-        private int SearchCommand_ExecutedAsync(string findThis)
+        private async Task<int> SearchCommand_ExecutedAsync(string findThis)
         {
-            // Setup search parameters
-            SearchParams param = new SearchParams(findThis
-               , (IsStringContainedSearchOption == true ?
-                  SearchMatch.StringIsContained : SearchMatch.StringIsMatched));
+            _Queue.Add(findThis);
 
+            //Make sure the task always processes the last input but is not started twice
+            await SlowStuffSemaphore.WaitAsync();
             try
             {
-                IsProcessing = true;
+                // There is more recent input to process so we ignore this one
+                if (_Queue.Count > 1)
+                {
+                    _Queue.Remove(findThis);
+                    return 0;
+                }
+                else
+                {
+                    Console.WriteLine("Queue Count: {0}", _Queue.Count);
+                }
 
-                // Do the search and return number of results as int
-                CountSearchMatches = Search.BackupNodeSearch.SearchPostOrderTraversal(
-                        _backUpCountryRoots
-                      , _CountyRootItems
-                      , param);
+                // Setup search parameters
+                SearchParams param = new SearchParams(findThis
+                   , (IsStringContainedSearchOption == true ?
+                      SearchMatch.StringIsContained : SearchMatch.StringIsMatched));
 
-                return CountSearchMatches;
+                try
+                {
+                    IsProcessing = true;
+
+                    // Do the search and return number of results as int
+                    CountSearchMatches = await Search.BackupNodeSearch.DoSearchAsync(
+                                                                            _backUpCountryRoots
+                                                                          , _CountryRootItems
+                                                                          , param);
+
+                    _Queue.Remove(findThis);
+
+                    this.StatusStringResult = findThis;
+
+                    return CountSearchMatches;
+                }
+                finally
+                {
+                    IsProcessing = false;
+                }
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine(exp.Message);
             }
             finally
             {
-                IsProcessing = false;
+                SlowStuffSemaphore.Release();
             }
+
+            return -1;
         }
         #endregion methods
     }

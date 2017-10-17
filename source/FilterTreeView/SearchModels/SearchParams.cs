@@ -16,7 +16,7 @@
         {
             SearchString = string.Empty;
             Match = Enums.SearchMatch.StringIsContained;
-            MinimalSearchStringLength = 3;
+            MinimalSearchStringLength = 2;
         }
         #endregion constructors
 

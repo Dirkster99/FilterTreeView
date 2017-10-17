@@ -2,7 +2,6 @@
 {
     using FilterTreeView.SearchModels;
     using FilterTreeView.SearchModels.Enums;
-    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
@@ -12,13 +11,16 @@
 
     internal class BackupNodeSearch
     {
+        private static DispatcherPriority _ChildrenEditPrio = DispatcherPriority.DataBind;
+
         /// <summary>
         /// Implements a PostOrder Search algorithm over a tree structure
         /// that can have n-root nodes.
         /// 
-        /// PostOrder Algorithm Source: https://blogs.msdn.microsoft.com/daveremy/2010/03/16/non-recursive-post-order-depth-first-traversal-in-c/
+        /// PostOrder Algorithm Source:
+        /// https://blogs.msdn.microsoft.com/daveremy/2010/03/16/non-recursive-post-order-depth-first-traversal-in-c/
         /// </summary>
-        internal static int SearchPostOrderTraversal(
+        internal static async Task<int> DoSearchAsync(
               IList<MetaLocationViewModel> backUpRoots
             , ObservableCollection<MetaLocationViewModel> root
             , SearchParams searchParams)
@@ -29,8 +31,8 @@
             searchParams.SearchStringTrim();
             searchParams.SearchStringToUpperCase();
 
-            root.Clear();
-
+            Application.Current.Dispatcher.Invoke(() => { root.Clear(); }, _ChildrenEditPrio);
+            
             // Show all root items if string to search is empty
             if (searchParams.IsSearchStringEmpty == true ||
                 searchParams.MinimalSearchStringLength >= searchParams.SearchString.Length)
@@ -41,7 +43,7 @@
                     rootItem.ChildrenClear(false);
                     rootItem.SetExpand(false);
 
-                    root.Add(rootItem);
+                    Application.Current.Dispatcher.Invoke(() => { root.Add(rootItem); }, _ChildrenEditPrio);
                 }
 
                 return 0;
@@ -55,7 +57,7 @@
                 rootItem.Match = MatchType.NoMatch;
 
                 // Match children of this root item
-                var nodeMatchCount = nonRecursivePostOrder(rootItem, searchParams);
+                var nodeMatchCount = await MatchNodesAsync(rootItem, searchParams);
 
                 imatchCount += nodeMatchCount;
 
@@ -84,11 +86,18 @@
                         rootItem.SetExpand(false);
 
                     //Console.WriteLine("node: {0} match count: {1}", rootItem.LocalName, nodeMatchCount);
-                    root.Add(rootItem);
+                    Application.Current.Dispatcher.Invoke(() => { root.Add(rootItem); }, _ChildrenEditPrio);
                 }
             }
 
             return imatchCount;
+        }
+
+        private static Task<int> MatchNodesAsync(
+             MetaLocationViewModel root
+           , SearchParams searchParams)
+        {
+            return Task.Run<int>(() => { return MatchNodes(root, searchParams); });
         }
 
         /// <summary>
@@ -98,7 +107,7 @@
         /// <param name="root"></param>
         /// <param name="filterString"></param>
         /// <returns></returns>
-        private static int nonRecursivePostOrder(
+        private static int MatchNodes(
              MetaLocationViewModel root
            , SearchParams searchParams)
         {
