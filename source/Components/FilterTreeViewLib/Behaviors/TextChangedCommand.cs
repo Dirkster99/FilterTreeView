@@ -1,4 +1,4 @@
-﻿namespace FilterTreeView.Behaviors
+﻿namespace FilterTreeViewLib.Behaviors
 {
     using System.Windows;
     using System.Windows.Controls;

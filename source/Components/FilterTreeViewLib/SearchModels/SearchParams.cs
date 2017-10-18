@@ -1,11 +1,11 @@
-﻿namespace FilterTreeView.SearchModels
+﻿namespace FilterTreeViewLib.SearchModels
 {
     /// <summary>
     /// Implements a search object that contains the search string,
     /// related options, as well as methods to determine whether a
     /// given string is a match against the string or not.
     /// </summary>
-    internal class SearchParams
+    public class SearchParams
     {
         #region constructors
         /// <summary>
@@ -16,7 +16,7 @@
             , Enums.SearchMatch match)
             : this()
         {
-            SearchString = (searchString == null ? string.Empty : searchString);
+            OriginalSearchString =  SearchString = (searchString == null ? string.Empty : searchString);
             Match = match;
         }
 
@@ -27,7 +27,7 @@
         {
             SearchString = string.Empty;
             Match = Enums.SearchMatch.StringIsContained;
-            MinimalSearchStringLength = 2;
+            MinimalSearchStringLength = 1;
         }
         #endregion constructors
 
@@ -36,6 +36,13 @@
         /// Gets the plain text string being searched or filtered.
         /// </summary>
         public string SearchString { get; private set; }
+
+        /// <summary>
+        /// Gets the plain text ORIGINAL string being searched or filtered.
+        /// This string is the string that was set by the constructor and
+        /// CANNOT be changed later on.
+        /// </summary>
+        public string OriginalSearchString { get; private set; }
 
         /// <summary>
         /// Gets the string being searched or filtered.
@@ -57,7 +64,7 @@
         /// Gets the minimal search string length required.
         /// Any string shorter than this will not be searched at all.
         /// </summary>
-        public int MinimalSearchStringLength { get; }
+        public int MinimalSearchStringLength { get; set; }
         #endregion properties
 
         #region methods

@@ -1,4 +1,4 @@
-﻿namespace FilterTreeView.Converters
+﻿namespace FilterTreeViewLib.Converters
 {
     using System;
     using System.Windows.Data;

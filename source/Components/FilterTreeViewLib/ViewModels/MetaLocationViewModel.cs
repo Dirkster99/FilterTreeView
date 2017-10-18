@@ -1,15 +1,15 @@
-﻿namespace FilterTreeView.ViewModels
+﻿namespace FilterTreeViewLib.ViewModels
 {
     using BusinessLib.Models;
-    using FilterTreeView.SearchModels;
-    using FilterTreeView.SearchModels.Enums;
+    using FilterTreeViewLib.SearchModels;
+    using FilterTreeViewLib.SearchModels.Enums;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Windows;
     using System.Windows.Threading;
 
-    internal class MetaLocationViewModel : Base.BaseViewModel
+    public class MetaLocationViewModel : Base.BaseViewModel
     {
         #region fields
         private static DispatcherPriority _ChildrenEditPrio = DispatcherPriority.DataBind;

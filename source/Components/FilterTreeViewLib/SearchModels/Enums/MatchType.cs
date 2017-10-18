@@ -1,4 +1,4 @@
-﻿namespace FilterTreeView.SearchModels.Enums
+﻿namespace FilterTreeViewLib.SearchModels.Enums
 {
     /// <summary>
     /// Determines whether a givem node has a match with regard to search parameters

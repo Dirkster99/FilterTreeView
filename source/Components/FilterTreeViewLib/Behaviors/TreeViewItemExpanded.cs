@@ -1,6 +1,6 @@
-﻿namespace FilterTreeView.Behaviors
+﻿namespace FilterTreeViewLib.Behaviors
 {
-    using FilterTreeView.ViewModels;
+    using FilterTreeViewLib.ViewModels;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;

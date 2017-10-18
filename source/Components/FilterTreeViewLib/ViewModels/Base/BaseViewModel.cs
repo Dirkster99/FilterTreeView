@@ -1,4 +1,4 @@
-﻿namespace FilterTreeView.ViewModels.Base
+﻿namespace FilterTreeViewLib.ViewModels.Base
 {
     using System;
     using System.ComponentModel;

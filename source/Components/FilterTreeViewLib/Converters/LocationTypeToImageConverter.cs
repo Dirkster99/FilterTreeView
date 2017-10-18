@@ -1,4 +1,4 @@
-﻿namespace FilterTreeView.Converters
+﻿namespace FilterTreeViewLib.Converters
 {
     using BusinessLib.Models;
     using System;

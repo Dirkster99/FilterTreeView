@@ -1,4 +1,4 @@
-﻿namespace FilterTreeView
+namespace FilterTreeViewRx
 {
     using System.Windows;
 
@@ -18,7 +18,7 @@
         {
             Loaded -= MainWindow_Loaded;
 
-            var appVM = new FilterTreeView.ViewModels.AppViewModel();
+            var appVM = new FilterTreeViewRx.ViewModels.AppViewModel();
             this.DataContext = appVM;
 
             await appVM.LoadSampleDataAsync();

@@ -1,4 +1,4 @@
-﻿namespace FilterTreeView.Views
+﻿namespace FilterTreeViewLib.Views
 {
     using System.Windows;
 

@@ -1,10 +1,16 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterTreeView", "FilterTreeView\FilterTreeView.csproj", "{9668A53D-608F-46B1-926C-14AC52CD35AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLib", "BusinessLib\BusinessLib.csproj", "{70CC82CC-9EFE-461F-A959-F64A06894621}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLib", "Components\BusinessLib\BusinessLib.csproj", "{70CC82CC-9EFE-461F-A959-F64A06894621}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterTreeViewLib", "Components\FilterTreeViewLib\FilterTreeViewLib.csproj", "{C5030463-0469-4AFA-92F4-F6B55A6B4C89}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", "{F0EEB4AD-6E8F-47AC-BE12-98A0A15ABD95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterTreeViewRx", "FilterTreeViewRx\FilterTreeViewRx.csproj", "{BA7985B3-CDA7-4D51-BB5D-B478F3A5E614}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,9 +26,21 @@ Global
 		{70CC82CC-9EFE-461F-A959-F64A06894621}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70CC82CC-9EFE-461F-A959-F64A06894621}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70CC82CC-9EFE-461F-A959-F64A06894621}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5030463-0469-4AFA-92F4-F6B55A6B4C89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5030463-0469-4AFA-92F4-F6B55A6B4C89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5030463-0469-4AFA-92F4-F6B55A6B4C89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5030463-0469-4AFA-92F4-F6B55A6B4C89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA7985B3-CDA7-4D51-BB5D-B478F3A5E614}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA7985B3-CDA7-4D51-BB5D-B478F3A5E614}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA7985B3-CDA7-4D51-BB5D-B478F3A5E614}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA7985B3-CDA7-4D51-BB5D-B478F3A5E614}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{70CC82CC-9EFE-461F-A959-F64A06894621} = {F0EEB4AD-6E8F-47AC-BE12-98A0A15ABD95}
+		{C5030463-0469-4AFA-92F4-F6B55A6B4C89} = {F0EEB4AD-6E8F-47AC-BE12-98A0A15ABD95}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E5C2784B-651F-471A-84F7-7A11969323CE}
