@@ -1,7 +1,8 @@
-﻿namespace FilterTreeViewLib.ViewModels.Search
+﻿namespace FilterTreeViewLib.ViewModelsSearch.Search
 {
-    using FilterTreeViewLib.SearchModels;
-    using FilterTreeViewLib.SearchModels.Enums;
+    using FilterTreeViewLib.ViewModels;
+    using FilterTreeViewLib.ViewModelsSearch.SearchModels;
+    using FilterTreeViewLib.ViewModelsSearch.SearchModels.Enums;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
@@ -16,6 +17,7 @@
     /// </summary>
     public class BackupNodeSearch
     {
+/***
         private static DispatcherPriority _ChildrenEditPrio = DispatcherPriority.Input;
 
         /// <summary>
@@ -247,5 +249,6 @@
                 }
             }
         }
+***/
     }
 }

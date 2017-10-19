@@ -97,6 +97,7 @@
         <TreeView Grid.Row="2"
                   Margin="3,0,3,3"
                   VerticalAlignment="Stretch"
+                  DataContext="{Binding Root}"
                   ItemsSource="{Binding CountryRootItems,Mode=OneWay}"
                   >
             <TreeView.Resources>

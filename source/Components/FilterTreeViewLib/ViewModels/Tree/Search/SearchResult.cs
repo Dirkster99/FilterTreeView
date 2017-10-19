@@ -1,4 +1,4 @@
-﻿namespace FilterTreeViewLib.SearchModels
+﻿namespace FilterTreeViewLib.ViewModelsSearch.SearchModels
 {
     /// <summary>
     /// Models the results of a search in terms of the actual string and options

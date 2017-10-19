@@ -1,6 +1,6 @@
 ﻿namespace FilterTreeViewLib.Behaviors
 {
-    using FilterTreeViewLib.ViewModels;
+    using FilterTreeViewLib.Interfaces;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
@@ -54,11 +54,11 @@
             if (uiElement == null)
                 return;
 
-            MetaLocationViewModel f = null;
+            IHasDummyChild f = null;
 
-            if (uiElement.DataContext is MetaLocationViewModel)
+            if (uiElement.DataContext is IHasDummyChild)
             {
-                f = uiElement.DataContext as MetaLocationViewModel;
+                f = uiElement.DataContext as IHasDummyChild;
 
                 // Message Expand only for those who have 1 dummy folder below
                 if (f.HasDummyChild == false)

@@ -1,17 +1,14 @@
-﻿namespace FilterTreeViewRx.ViewModels
+namespace FilterTreeViewRxVis.ViewModels
 {
-    using FilterTreeViewLib.ViewModels;
-    using FilterTreeViewLib.ViewModelsSearch.Search;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels.Enums;
-    using FilterTreeViewRx.Commands;
+    using FilterTreeViewRxVis.Commands;
     using System;
     using System.ComponentModel;
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
     using System.Windows;
-    using System.Windows.Threading;
 
     /// <summary>
     /// Implements the application viewmodel object that manages all main commands
@@ -23,6 +20,8 @@
     internal class AppViewModel : FilterTreeViewLib.ViewModels.AppBaseViewModel
     {
         #region fields
+        protected readonly TestLocationRootViewModel _TestRoot;
+
         private ReactiveRelayCommand textBoxEnterCommand;
 
             // Use this if you need logger output of the input value stream
@@ -36,6 +35,8 @@
         public AppViewModel()
             : base()
         {
+            _TestRoot = new TestLocationRootViewModel();
+
             // Setup the command for the enter key on the textbox
             textBoxEnterCommand = new ReactiveRelayCommand(obj => { });
 
@@ -86,9 +87,19 @@
                 CountSearchMatches = result.Results;
             }
             );
-
         }
         #endregion constructors
+
+        /// <summary>
+        /// Gets all root viewmodel that can be bound to a treeview
+        /// </summary>
+        public new TestLocationRootViewModel Root
+        {
+            get
+            {
+                return _TestRoot;
+            }
+        }
 
         /// <summary>
         /// Gets a command that is executed when the user hits enter in the bound textbox.

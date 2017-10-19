@@ -1,10 +1,10 @@
 ﻿namespace FilterTreeView.ViewModels
 {
-    using FilterTreeViewLib.SearchModels;
-    using FilterTreeViewLib.SearchModels.Enums;
     using FilterTreeViewLib.ViewModels;
     using FilterTreeViewLib.ViewModels.Base;
-    using FilterTreeViewLib.ViewModels.Search;
+    using FilterTreeViewLib.ViewModelsSearch.Search;
+    using FilterTreeViewLib.ViewModelsSearch.SearchModels;
+    using FilterTreeViewLib.ViewModelsSearch.SearchModels.Enums;
     using System;
     using System.Collections.Generic;
     using System.Threading;
@@ -60,7 +60,7 @@
                     },
                     (p =>
                     {
-                        if (_backUpCountryRoots.Count == 0 && IsProcessing == false)
+                        if (Root.BackUpCountryRootsCount == 0 && IsProcessing == false)
                             return false;
 
                         return true;
@@ -84,21 +84,8 @@
             StatusStringResult = "Loading Data... please wait.";
             try
             {
-                var isoCountries = await BusinessLib.Database.LoadData
-                    (@".\Resources\lokasyon.zip", "countries.xml", "regions.xml", "cities.xml");
-
-                foreach (var item in isoCountries)
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        //var vmItem = new MetaLocationViewModel(item, null);
-                        var vmItem = MetaLocationViewModel.GetViewModelFromModel(item);
-
-                        _backUpCountryRoots.Add(vmItem);
-                        //_CountryRootItems.Add(vmItem);
-
-                    }, DispatcherPriority.ApplicationIdle);
-                }
+                await Root.LoadData(@".\Resources\lokasyon.zip"
+                                  , "countries.xml", "regions.xml", "cities.xml");
 
                 StatusStringResult = string.Format("Searching... '{0}'", SearchString);
                 await SearchCommand_ExecutedAsync(SearchString);
@@ -127,10 +114,6 @@
                     _Queue.Remove(findThis);
                     return 0;
                 }
-                else
-                {
-                    Console.WriteLine("Queue Count: {0}", _Queue.Count);
-                }
 
                 // Setup search parameters
                 SearchParams param = new SearchParams(findThis
@@ -142,9 +125,7 @@
                     IsProcessing = true;
 
                     // Do the search and return number of results as int
-                    CountSearchMatches = await BackupNodeSearch.DoSearchAsync(_backUpCountryRoots
-                                                                              , _CountryRootItems
-                                                                              , param);
+                    CountSearchMatches = await Root.DoSearchAsync(param);
 
                     _Queue.Remove(findThis);
 

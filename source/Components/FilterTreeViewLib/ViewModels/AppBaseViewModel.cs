@@ -1,25 +1,18 @@
 ﻿namespace FilterTreeViewLib.ViewModels
 {
-    using FilterTreeViewLib.ViewModels.Base;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Threading.Tasks;
-    using System.Windows.Input;
 
     public abstract class AppBaseViewModel : Base.BaseViewModel
     {
         #region fields
-        protected readonly ObservableCollection<MetaLocationViewModel> _CountryRootItems = null;
-        protected readonly IList<MetaLocationViewModel> _backUpCountryRoots = null;
-
         private bool _IsStringContainedSearchOption;
         private int _CountSearchMatches;
         private bool _IsProcessing;
 
-        private ICommand _ExpandCommand;
-
         private string _StatusStringResult;
         private string _SearchString;
+
+        protected readonly MetaLocationRootViewModel _Root;
         #endregion fields
 
         #region constructors
@@ -33,20 +26,19 @@
             _CountSearchMatches = 0;
             _IsStringContainedSearchOption = true;
 
-            _CountryRootItems = new ObservableCollection<MetaLocationViewModel>();
-            _backUpCountryRoots = new List<MetaLocationViewModel>(400);
+            _Root = new MetaLocationRootViewModel();
         }
         #endregion constructors
 
         #region properties
         /// <summary>
-        /// Gets all bindable rootitems of the displayed treeview
+        /// Gets all root viewmodel that can be bound to a treeview
         /// </summary>
-        public ObservableCollection<MetaLocationViewModel> CountryRootItems
+        public MetaLocationRootViewModel Root
         {
             get
             {
-                return _CountryRootItems;
+                return _Root;
             }
         }
 
@@ -131,30 +123,6 @@
                     _CountSearchMatches = value;
                     NotifyPropertyChanged(() => CountSearchMatches);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Gets a command that expands the item given in the command parameter.
-        /// </summary>
-        public ICommand ExpandCommand
-        {
-            get
-            {
-                if (_ExpandCommand == null)
-                {
-                    _ExpandCommand = new RelayCommand<object>((p) =>
-                    {
-                        var param = p as MetaLocationViewModel;
-
-                        if (param == null)
-                            return;
-
-                        param.LoadChildren();
-                    });
-                }
-
-                return _ExpandCommand;
             }
         }
         #endregion properties

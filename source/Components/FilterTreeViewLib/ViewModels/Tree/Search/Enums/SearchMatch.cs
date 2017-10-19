@@ -1,4 +1,4 @@
-﻿namespace FilterTreeViewLib.SearchModels.Enums
+﻿namespace FilterTreeViewLib.ViewModelsSearch.SearchModels.Enums
 {
     /// <summary>
     /// Determines the type of match that should be implemented to
