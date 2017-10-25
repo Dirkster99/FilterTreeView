@@ -103,6 +103,10 @@
                   VerticalAlignment="Stretch"
                   DataContext="{Binding Root}"
                   ItemsSource="{Binding CountryRootItems,Mode=OneWay}"
+                  
+                  VirtualizingStackPanel.IsVirtualizing="True"
+                  VirtualizingStackPanel.VirtualizationMode="Recycling"
+                  Style="{StaticResource TreeViewStyle}"
                   >
             <TreeView.Resources>
                 <!-- Use a proxy to bind items to root properties of this collection -->

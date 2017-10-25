@@ -1,7 +1,5 @@
 ﻿namespace FilterTreeViewRx.ViewModels
 {
-    using FilterTreeViewLib.ViewModels;
-    using FilterTreeViewLib.ViewModelsSearch.Search;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels.Enums;
     using FilterTreeViewRx.Commands;
@@ -11,7 +9,6 @@
     using System.Reactive.Linq;
     using System.Threading.Tasks;
     using System.Windows;
-    using System.Windows.Threading;
 
     /// <summary>
     /// Implements the application viewmodel object that manages all main commands
@@ -55,9 +52,8 @@
                     .Where(ev => SearchString != null && SearchString.Length >= 4)
                     .Throttle(TimeSpan.FromMilliseconds(400)))
                 .Select(args => SearchString)
-                .Merge(
-                    textBoxEnterCommand.Executed.Select(e => SearchString))
-                .DistinctUntilChanged();
+                .Merge(textBoxEnterCommand.Executed.Select(e => SearchString))
+                .DistinctUntilChanged();                      // Don't requery if value has not changed
 
             // Log all events in the event stream to the Log viewer
 ///            input.ObserveOn(Application.Current.Dispatcher)
@@ -66,10 +62,10 @@
 
 
             // Setup an Observer for the search operation
-            //var search = Observable.ToAsync<string, SearchResult>(DoSearch);
             var search = Observable.ToAsync<string, SearchResult>(DoSearch);
 
-            // Chain the input event stream and the search stream, cancelling searches when input is received
+            // Chain the input event stream and the search stream
+            // cancelling searches when input is received
             var results = from searchTerm in input
                           from result in search(searchTerm).TakeUntil(input)
                           select result;
@@ -86,7 +82,6 @@
                 CountSearchMatches = result.Results;
             }
             );
-
         }
         #endregion constructors
 

@@ -17,7 +17,7 @@
     public class TestLocationRootViewModel : FilterTreeViewLib.ViewModels.Base.BaseViewModel
     {
         #region fields
-        private const DispatcherPriority _ChildrenEditPrio = DispatcherPriority.Input;
+        private const DispatcherPriority _ChildrenEditPrio = DispatcherPriority.DataBind;
 
         protected readonly ObservableCollection<TestLocationViewModel> _CountryRootItems = null;
 

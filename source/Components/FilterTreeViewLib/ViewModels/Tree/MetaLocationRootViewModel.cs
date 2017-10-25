@@ -17,7 +17,7 @@
     public class MetaLocationRootViewModel : Base.BaseViewModel
     {
         #region fields
-        private const DispatcherPriority _ChildrenEditPrio = DispatcherPriority.Input;
+        private const DispatcherPriority _ChildrenEditPrio = DispatcherPriority.DataBind;
 
         protected readonly ObservableCollection<MetaLocationViewModel> _CountryRootItems = null;
         protected readonly IList<MetaLocationViewModel> _BackUpCountryRoots = null;

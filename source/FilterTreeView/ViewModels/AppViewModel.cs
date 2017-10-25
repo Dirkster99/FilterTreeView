@@ -1,17 +1,13 @@
 ﻿namespace FilterTreeView.ViewModels
 {
-    using FilterTreeViewLib.ViewModels;
     using FilterTreeViewLib.ViewModels.Base;
-    using FilterTreeViewLib.ViewModelsSearch.Search;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels.Enums;
     using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Windows;
     using System.Windows.Input;
-    using System.Windows.Threading;
 
     /// <summary>
     /// Implements the application viewmodel object that manages all main commands

@@ -61,7 +61,6 @@
     <Compile Include="ViewModels\Base\BaseViewModel.cs" />
     <Compile Include="ViewModels\Base\RelayCommand.cs" />
     <Compile Include="ViewModels\Tree\MetaLocationViewModel.cs" />
-    <Compile Include="ViewModels\Tree\Search\BackupNodeSearch.cs" />
     <Compile Include="Views\BindingProxy.cs" />
   </ItemGroup>
   <ItemGroup>
