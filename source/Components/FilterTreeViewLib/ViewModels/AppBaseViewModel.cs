@@ -8,11 +8,10 @@
         private bool _IsStringContainedSearchOption;
         private int _CountSearchMatches;
         private bool _IsProcessing;
+        private bool _IsLoading;
 
         private string _StatusStringResult;
         private string _SearchString;
-
-        protected readonly MetaLocationRootViewModel _Root;
         #endregion fields
 
         #region constructors
@@ -22,26 +21,13 @@
         public AppBaseViewModel()
         {
             _SearchString = "Washington";
-            _IsProcessing = false;
+            _IsProcessing = _IsLoading = false;
             _CountSearchMatches = 0;
             _IsStringContainedSearchOption = true;
-
-            _Root = new MetaLocationRootViewModel();
         }
         #endregion constructors
 
         #region properties
-        /// <summary>
-        /// Gets all root viewmodel that can be bound to a treeview
-        /// </summary>
-        public MetaLocationRootViewModel Root
-        {
-            get
-            {
-                return _Root;
-            }
-        }
-
         /// <summary>
         /// Gets a property to determine if application is currently processing
         /// data (loading or searching for matches in the tree view) or not.
@@ -55,6 +41,23 @@
                 {
                     _IsProcessing = value;
                     NotifyPropertyChanged(() => IsProcessing);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a property to determine if application is currently processing
+        /// data (loading or searching for matches in the tree view) or not.
+        /// </summary>
+        public bool IsLoading
+        {
+            get { return _IsLoading; }
+            protected set
+            {
+                if (_IsLoading != value)
+                {
+                    _IsLoading = value;
+                    NotifyPropertyChanged(() => IsLoading);
                 }
             }
         }

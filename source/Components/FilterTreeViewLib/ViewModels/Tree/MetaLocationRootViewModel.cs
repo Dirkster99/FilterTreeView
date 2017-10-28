@@ -6,6 +6,7 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Input;
@@ -127,11 +128,11 @@
         /// https://blogs.msdn.microsoft.com/daveremy/2010/03/16/non-recursive-post-order-depth-first-traversal-in-c/
         /// </summary>
         /// <param name="searchParams"></param>
-        public async Task<int> DoSearchAsync(SearchParams searchParams)
+        public async Task<int> DoSearchAsync(SearchParams searchParams, CancellationToken token)
         {
             return await Task.Run<int>(() =>
             {
-                return DoSearch(searchParams);
+                return DoSearch(searchParams, token);
             });
         }
 
@@ -143,7 +144,7 @@
         /// https://blogs.msdn.microsoft.com/daveremy/2010/03/16/non-recursive-post-order-depth-first-traversal-in-c/
         /// </summary>
         /// <param name="searchParams"></param>
-        public int DoSearch(SearchParams searchParams)
+        public int DoSearch(SearchParams searchParams, CancellationToken token)
         {
             IList<MetaLocationViewModel> backUpRoots = _BackUpCountryRoots;
             ObservableCollection<MetaLocationViewModel> root = _CountryRootItems;
@@ -162,6 +163,9 @@
             {
                 foreach (var rootItem in backUpRoots)
                 {
+                    if (token.IsCancellationRequested == true)
+                        return 0;
+
                     //PreOrderTraversal(rootItem);  !!! Lazy Loading Children !!!
                     rootItem.ChildrenClear(false);
                     rootItem.SetExpand(false);
@@ -177,6 +181,9 @@
             // Go through all root items and process their children
             foreach (var rootItem in backUpRoots)
             {
+                if (token.IsCancellationRequested == true)
+                    return 0;
+
                 rootItem.Match = MatchType.NoMatch;
 
                 // Match children of this root item

@@ -10,7 +10,7 @@
         xmlns:conv="clr-namespace:FilterTreeViewLib.Converters;assembly=FilterTreeViewLib"
 
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525"
+        Title="FilterTreeView (BackupNodes Approach)" Height="350" Width="525"
         Icon="{StaticResource AppImage}"
         FocusManager.FocusedElement="{Binding ElementName=FilterTextBox}"
         >
@@ -73,6 +73,7 @@
                      x:Name="FilterTextBox"
                      ToolTip="Enter at least 3 chracters"
                      behav:TextChangedCommand.ChangedCommand="{Binding SearchCommand}"
+                     IsEnabled="{Binding IsLoading, Mode=OneWay,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource InverseBooleanConverter}}"
                 />
                 
                 <Button Content="Search"
@@ -86,6 +87,7 @@
             <Grid Grid.Row="1">
                 <CheckBox Content="String is contained"
                           IsChecked="{Binding IsStringContainedSearchOption}"
+                          IsEnabled="{Binding IsProcessing, Mode=OneWay,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource InverseBooleanConverter}}"
                           Margin="3"
                           />
             </Grid>

@@ -1,4 +1,4 @@
-﻿namespace FilterTreeViewRxVis.ViewModels
+﻿namespace FilterTreeViewVis.ViewModels
 {
     using FilterTreeViewLib.ViewModels.Base;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels;
@@ -6,6 +6,7 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Input;
@@ -13,6 +14,8 @@
 
     /// <summary>
     /// Implements the root viewmodel of the tree structure to be presented in a treeview.
+    /// (This implementation filters through the Visibility of a treeview item instead of
+    ///  using BackUpNodes with Add/Remove)
     /// </summary>
     public class TestLocationRootViewModel : FilterTreeViewLib.ViewModels.Base.BaseViewModel
     {
@@ -125,11 +128,11 @@
         /// https://blogs.msdn.microsoft.com/daveremy/2010/03/16/non-recursive-post-order-depth-first-traversal-in-c/
         /// </summary>
         /// <param name="searchParams"></param>
-        public async Task<int> DoSearchAsync(SearchParams searchParams)
+        public async Task<int> DoSearchAsync(SearchParams searchParams, CancellationToken token)
         {
             return await Task.Run<int>(() =>
             {
-                return DoSearch(searchParams);
+                return DoSearch(searchParams, token);
             });
         }
 
@@ -141,7 +144,7 @@
         /// https://blogs.msdn.microsoft.com/daveremy/2010/03/16/non-recursive-post-order-depth-first-traversal-in-c/
         /// </summary>
         /// <param name="searchParams"></param>
-        public int DoSearch(SearchParams searchParams)
+        public int DoSearch(SearchParams searchParams, CancellationToken token)
         {
             ObservableCollection<TestLocationViewModel> root = _CountryRootItems;
 
@@ -157,6 +160,9 @@
             {
                 foreach (var rootItem in CountryRootItems)
                 {
+                    if (token.IsCancellationRequested == true)
+                        return 0;
+
                     rootItem.IsItemVisible = true;
                     //PreOrderTraversal(rootItem);  !!! Lazy Loading Children !!!
                     //rootItem.ChildrenClear(false);
@@ -173,6 +179,9 @@
             // Go through all root items and process their children
             foreach (var rootItem in CountryRootItems)
             {
+                if (token.IsCancellationRequested == true)
+                    return 0;
+
                 rootItem.Match = MatchType.NoMatch;
 
                 // Match children of this root item
@@ -315,5 +324,5 @@
             }
         }
         #endregion methods
-    }
+   }
 }

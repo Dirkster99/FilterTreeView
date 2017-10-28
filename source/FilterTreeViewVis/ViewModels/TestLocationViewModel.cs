@@ -1,4 +1,4 @@
-﻿namespace FilterTreeViewRxVis.ViewModels
+﻿namespace FilterTreeViewVis.ViewModels
 {
     using BusinessLib.Models;
     using FilterTreeViewLib.Interfaces;

@@ -1,16 +1,16 @@
-<Window x:Class="FilterTreeViewRxVis.MainWindow"
+<Window x:Class="FilterTreeViewVis.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         
-        xmlns:vm="clr-namespace:FilterTreeViewRxVis.ViewModels"
+        xmlns:vm="clr-namespace:FilterTreeViewVis.ViewModels"
         xmlns:views="clr-namespace:FilterTreeViewLib.Views;assembly=FilterTreeViewLib"
         xmlns:behav="clr-namespace:FilterTreeViewLib.Behaviors;assembly=FilterTreeViewLib"
         xmlns:conv="clr-namespace:FilterTreeViewLib.Converters;assembly=FilterTreeViewLib"
 
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525"
+        Title="FilterTreeView (Visibility Property)" Height="350" Width="525"
         Icon="{StaticResource AppImage}"
         FocusManager.FocusedElement="{Binding ElementName=FilterTextBox}"
         >
@@ -72,17 +72,18 @@
                      Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}"
                      x:Name="FilterTextBox"
                      ToolTip="Enter at least 3 chracters"
+                     behav:TextChangedCommand.ChangedCommand="{Binding SearchCommand}"
                      >
                     <TextBox.InputBindings>
                     <KeyBinding
-                        Command="{Binding TextBoxEnterCommand}"
+                        Command="{Binding SearchCommand}"
                         Key="Enter" />
                     </TextBox.InputBindings>
                 </TextBox>
 
                 <Button Content="Search"
                     Grid.Column="1"
-                    Command="{Binding TextBoxEnterCommand}"
+                    Command="{Binding SearchCommand}"
                     IsEnabled="{Binding IsProcessing, Mode=OneWay,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource InverseBooleanConverter}}"
                     Margin="3" />
             </Grid>

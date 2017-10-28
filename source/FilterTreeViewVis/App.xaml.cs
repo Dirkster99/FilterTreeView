@@ -1,4 +1,4 @@
-namespace FilterTreeViewRx
+namespace FilterTreeViewVis
 {
     using System.Windows;
 

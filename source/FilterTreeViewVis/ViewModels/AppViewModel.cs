@@ -1,6 +1,5 @@
-﻿namespace FilterTreeView.ViewModels
+namespace FilterTreeViewVis.ViewModels
 {
-    using FilterTreeViewLib.ViewModels;
     using FilterTreeViewLib.ViewModels.Base;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels.Enums;
@@ -14,16 +13,21 @@
     /// <summary>
     /// Implements the application viewmodel object that manages all main commands
     /// and bindings visible in the main window.
+    /// 
+    /// Reactive Code Source:
+    /// http://blog.petegoo.com/2011/11/22/building-an-auto-complete-control-with-reactive-extensions-rx/
     /// </summary>
     internal class AppViewModel : FilterTreeViewLib.ViewModels.AppBaseViewModel
     {
         #region fields
-        private readonly MetaLocationRootViewModel _Root;
-
-        private ICommand _SearchCommand;
+        protected readonly TestLocationRootViewModel _TestRoot;
 
         private Dictionary<string, CancellationTokenSource> _Queue = null;
         private static SemaphoreSlim SlowStuffSemaphore = null;
+        private ICommand _SearchCommand;
+
+        // Use this if you need logger output of the input value stream
+        ////        private readonly ObservableCollection<string> logOutput = new ObservableCollection<string>();
         #endregion fields
 
         #region constructors
@@ -33,7 +37,7 @@
         public AppViewModel()
             : base()
         {
-            _Root = new MetaLocationRootViewModel();
+            _TestRoot = new TestLocationRootViewModel();
 
             _Queue = new Dictionary<string, CancellationTokenSource>();
             SlowStuffSemaphore = new SemaphoreSlim(1, 1);
@@ -44,11 +48,11 @@
         /// <summary>
         /// Gets all root viewmodel that can be bound to a treeview
         /// </summary>
-        public MetaLocationRootViewModel Root
+        public new TestLocationRootViewModel Root
         {
             get
             {
-                return _Root;
+                return _TestRoot;
             }
         }
 
@@ -73,7 +77,7 @@
                     },
                     (p =>
                     {
-                        if (Root.BackUpCountryRootsCount == 0 && IsProcessing == false)
+                        if (IsProcessing == true)
                             return false;
 
                         return true;
@@ -94,30 +98,39 @@
         public override async Task LoadSampleDataAsync()
         {
             IsProcessing = true;
-            IsLoading = true;
             StatusStringResult = "Loading Data... please wait.";
             try
             {
                 await Root.LoadData(@".\Resources\lokasyon.zip"
-                                  , "countries.xml", "regions.xml", "cities.xml");
+                                 , "countries.xml", "regions.xml", "cities.xml");
 
-                IsLoading = false;
                 StatusStringResult = string.Format("Searching... '{0}'", SearchString);
-
-                await SearchCommand_ExecutedAsync(SearchString);
+                await DoSearchAsync(SearchString);
             }
             finally
             {
-                IsLoading = false;
                 IsProcessing = false;
             }
+        }
+
+        /// <summary>
+        /// Async version to filter the display of nodes in a treeview
+        /// with a filterstring (node is shown if filterstring is contained).
+        /// </summary>
+        /// <param name="findThis"></param>
+        /// <returns></returns>
+        private async Task<SearchResult> DoSearchAsync(string findThis)
+        {
+            return await Task.Run<SearchResult>(() => { return SearchCommand_ExecutedAsync(findThis); });
         }
 
         /// <summary>
         /// Filters the display of nodes in a treeview
         /// with a filterstring (node is shown if filterstring is contained).
         /// </summary>
-        protected async Task<int> SearchCommand_ExecutedAsync(string findThis)
+        /// <param name="findThis"></param>
+        /// <returns></returns>
+        private async Task<SearchResult> SearchCommand_ExecutedAsync(string findThis)
         {
             // Cancel current task(s) if there is any...
             var queueList = _Queue.Values.ToList();
@@ -130,10 +143,10 @@
 
             // Setup search parameters
             SearchParams param = new SearchParams(findThis
-                , (IsStringContainedSearchOption == true ?
-                    SearchMatch.StringIsContained : SearchMatch.StringIsMatched));
+               , (IsStringContainedSearchOption == true ?
+                  SearchMatch.StringIsContained : SearchMatch.StringIsMatched));
 
-            // Make sure the task always processes the last input but is not started twice
+            //Make sure the task always processes the last input but is not started twice
             await SlowStuffSemaphore.WaitAsync();
             try
             {
@@ -143,14 +156,14 @@
                 if (_Queue.Count > 1)
                 {
                     _Queue.Remove(findThis);
-                    return 0;
+                    return new SearchResult(param, 0);
                 }
 
                 // Do the search and return number of results as int
                 CountSearchMatches = await Root.DoSearchAsync(param, tokenSource.Token);
 
                 this.StatusStringResult = findThis;
-                return CountSearchMatches;
+                return new SearchResult(param, CountSearchMatches);
             }
             catch (Exception exp)
             {
@@ -159,11 +172,11 @@
             finally
             {
                 _Queue.Remove(findThis);
-                IsProcessing = false;
                 SlowStuffSemaphore.Release();
+                IsProcessing = false;
             }
 
-            return -1;
+            return new SearchResult(param, 0);
         }
         #endregion methods
     }
