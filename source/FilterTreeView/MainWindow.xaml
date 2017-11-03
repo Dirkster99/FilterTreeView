@@ -23,7 +23,7 @@
                                             False="Hidden" True="Visible" />
 
             <conv:InverseBooleanConverter  x:Key="InverseBooleanConverter" />
-            <Style x:Key="TreeViewStyle">
+            <Style x:Key="TreeViewStyle" TargetType="{x:Type TreeView}">
                 <Setter Property="TreeView.Background" Value="Transparent"/>
                 <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
                 <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
