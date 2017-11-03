@@ -6,6 +6,7 @@ This is a WPF/MVVM Search and Filter TreeView Reference Application
 ## City Search (String is contained):
 
 * 48 Washington
+* 22 Holland
 * 29 Paris
 * 23 London
 * 15 Brighton
@@ -13,5 +14,6 @@ This is a WPF/MVVM Search and Filter TreeView Reference Application
 * 10 Bremen
 * 14 Francisco
 * &nbsp;9 Madrid
-* &nbsp;7 Liverpool 
+* &nbsp;7 Liverpool
+* &nbsp;7 Amsterdam
 * &nbsp;3 Muenster
