@@ -20,7 +20,7 @@
 
         private static readonly MetaLocationViewModel DummyChild = new MetaLocationViewModel();
 
-        private bool _IsItemVisible;
+////        private bool _IsItemVisible;
         private bool _IsItemExpanded;
         private List<MetaLocationViewModel> _BackUpNodes = null;
 
@@ -55,7 +55,7 @@
         /// </summary>
         protected MetaLocationViewModel()
         {
-            _IsItemVisible = true;
+////            _IsItemVisible = true;
             _IsItemExpanded = false;
 
             _Children = new ObservableCollection<MetaLocationViewModel>();
@@ -67,12 +67,21 @@
         #endregion constructors
 
         #region properties
-        public MetaLocationViewModel Parent { get; set; }
+        /// <summary>
+        /// Gets the <seealso cref="MetaLocationModel"/> Parent (if any) of this item.
+        /// </summary>
+        public MetaLocationViewModel Parent { get; private set; }
 
+        /// <summary>
+        /// Gets the <see cref="MatchType"/> for this item. This field
+        /// determines the classification of a match towards a current
+        /// search criteria.
+        /// </summary>
         public MatchType Match
         {
             get { return _Match; }
-            set
+
+            private set
             {
                 if (_Match != value)
                 {
@@ -82,19 +91,27 @@
             }
         }
 
-        public bool IsItemVisible
-        {
-            get { return _IsItemVisible; }
-            set
-            {
-                if (_IsItemVisible != value)
-                {
-                    _IsItemVisible = value;
-                    NotifyPropertyChanged(() => IsItemVisible);
-                }
-            }
-        }
+////        /// <summary>
+////        /// Gets/sets whether this item is visible in
+////        /// the tree view, or not.
+////        /// </summary>
+////        public bool IsItemVisible
+////        {
+////            get { return _IsItemVisible; }
+////            set
+////            {
+////                if (_IsItemVisible != value)
+////                {
+////                    _IsItemVisible = value;
+////                    NotifyPropertyChanged(() => IsItemVisible);
+////                }
+////            }
+////        }
 
+        /// <summary>
+        /// Gets/sets whether this item is expanded in
+        /// the tree view (items under this item are visible), or not.
+        /// </summary>
         public bool IsItemExpanded
         {
             get { return _IsItemExpanded; }
@@ -108,13 +125,17 @@
             }
         }
 
+        /// <summary>
+        /// Gets the name of this item (name of country, region, or city)
+        /// </summary>
         public string LocalName
         {
             get
             {
                 return _LocalName;
             }
-            set
+
+            private set
             {
                 if (_LocalName != value)
                 {
@@ -124,10 +145,19 @@
             }
         }
 
+        /// <summary>
+        /// Gets the technical ID (for data reference) of this item.
+        /// </summary>
         public int ID { get; }
 
+        /// <summary>
+        /// Gets the Geographical Latitude (if any) of this item.
+        /// </summary>
         public double Latitude { get; }
 
+        /// <summary>
+        /// Gets the Geographical Longitude (if any) of this item.
+        /// </summary>
         public double Longitude { get; }
 
         /// <summary>
@@ -135,6 +165,14 @@
         /// </summary>
         public LocationType TypeOfLocation { get; }
 
+        /// <summary>
+        /// Gets the COMPLETE collection of child items under this item (complete sub-tree).
+        /// This collection is always complete, maintained, and always available list of
+        /// items under this item.
+        /// 
+        /// The <see cref="Children"/> collection contains child items (sub-tree) matched
+        /// to the current search criteria (if any).
+        /// </summary>
         public IEnumerable<MetaLocationViewModel> BackUpNodes
         {
             get
@@ -143,6 +181,14 @@
             }
         }
 
+        /// <summary>
+        /// Gets all child items (nodes) under this item. This collection (sub-tree)
+        /// may hold no items, if this item is filtered and none of the items in the
+        /// <see cref="Children"/> collection matched the current search criteria.
+        /// 
+        /// The <see cref="BackUpNodes"/> collection contains the complete, maintained,
+        /// and always available list of items under this item.
+        /// </summary>
         public IEnumerable<MetaLocationViewModel> Children
         {
             get
@@ -151,6 +197,9 @@
             }
         }
 
+        /// <summary>
+        /// Returns the total number of child items (nodes) under this item.
+        /// </summary>
         public int ChildrenCount => _BackUpNodes.Count;
 
         /// <summary>
@@ -176,11 +225,37 @@
 
         #region methods
         /// <summary>
+        /// Returns the string path either:
+        /// 1) for the <paramref name="current"/> item or
+        /// 2) for this item (if optional parameter <paramref name="current"/> is not set).
+        /// </summary>
+        /// <param name="current"></param>
+        /// <returns></returns>
+        public string GetStackPath(MetaLocationViewModel current = null)
+        {
+            if (current == null)
+                current = this;
+
+            string result = string.Empty;
+
+            // Traverse the list of parents backwards and
+            // add each child to the path
+            while (current != null)
+            {
+                result = "/" + LocalName + result;
+
+                current = current.Parent;
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Convert a Model into a ViewModel using
         /// a LevelOrderTraversal Algorithm
         /// </summary>
         /// <param name="srcRoot"></param>
-        public static MetaLocationViewModel GetViewModelFromModel(MetaLocationModel srcRoot)
+        internal static MetaLocationViewModel GetViewModelFromModel(MetaLocationModel srcRoot)
         {
             if (srcRoot == null)
                 return null;
@@ -216,20 +291,10 @@
         }
 
         /// <summary>
-        /// Sets the tree view item to the corresponding expanded state
-        /// as indicated in the <seealso cref="IsExpanded"/> property.
+        /// Re-load treeview items below the root item.
         /// </summary>
-        /// <param name="isExpanded"></param>
-        public void SetExpand(bool isExpanded)
-        {
-            IsItemExpanded = isExpanded;
-        }
-
-        /// <summary>
-        /// Re-load treeview items below the computer root item.
-        /// </summary>
-        /// <returns>Number of items found below the computer root item.</returns>
-        public int LoadChildren()
+        /// <returns>Number of items found below the root item.</returns>
+        internal int LoadChildren()
         {
             ChildrenClear(false, false); // Clear collection of children
 
@@ -242,33 +307,7 @@
             return _Children.Count;
         }
 
-        public void ChildrenAdd(MetaLocationViewModel child, bool bAddBackup = true)
-        {
-            if (HasDummyChild == true)
-            {
-                Application.Current.Dispatcher.Invoke(() => { _Children.Clear(); }, _ChildrenEditPrio);
-            }
-
-            Application.Current.Dispatcher.Invoke(() => { _Children.Add(child); }, _ChildrenEditPrio);
-
-            if (bAddBackup == true)
-                _BackUpNodes.Add(child);
-        }
-
-        public void ChildrenAddBackupNodes(MetaLocationViewModel child)
-        {
-            _BackUpNodes.Add(child);
-        }
-
-        public void ChildrenRemove(MetaLocationViewModel child, bool bRemoveBackup = true)
-        {
-            Application.Current.Dispatcher.Invoke(() => { _Children.Remove(child); }, _ChildrenEditPrio);
-
-            if (bRemoveBackup == true)
-                _BackUpNodes.Remove(child);
-        }
-
-        public void ChildrenClear(bool bClearBackup = true
+        internal void ChildrenClear(bool bClearBackup = true
                                 , bool bAddDummyChild = true)
         {
             Application.Current.Dispatcher.Invoke(() => { _Children.Clear(); }, _ChildrenEditPrio);
@@ -284,38 +323,12 @@
         }
 
         /// <summary>
-        /// Returns the string path either:
-        /// 1) for the <paramref name="current"/> item or
-        /// 2) for this item (if optional parameter <paramref name="current"/> is not set).
-        /// </summary>
-        /// <param name="current"></param>
-        /// <returns></returns>
-        public string GetStackPath(MetaLocationViewModel current = null)
-        {
-            if (current == null)
-                current = this;
-
-            string result = string.Empty;
-
-            // Traverse the list of parents backwards and
-            // add each child to the path
-            while (current != null)
-            {
-                result = "/" + LocalName + result;
-
-                current = current.Parent;
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Determines the <seealso cref="MatchType"/> of a node by evaluating the
         /// given search string parameter and the matchtype of its children.
         /// </summary>
         /// <param name="node"></param>
         /// <param name="filterString"></param>
-        public MatchType ProcessNodeMatch(SearchParams searchParams)
+        internal MatchType ProcessNodeMatch(SearchParams searchParams)
         {
             MatchType matchThisNode = MatchType.NoMatch;
 
@@ -357,6 +370,67 @@
             }
 
             return matchThisNode;
+        }
+
+        /// <summary>
+        /// Sets the tree view item to the corresponding expanded state
+        /// as indicated in the <seealso cref="IsExpanded"/> property.
+        /// </summary>
+        /// <param name="isExpanded"></param>
+        internal void SetExpand(bool isExpanded)
+        {
+            IsItemExpanded = isExpanded;
+        }
+
+        /// <summary>
+        /// Sets the type of match detmerined for this item against a certain
+        /// match criteria.
+        /// 
+        /// We use this method instead of a setter to make this accessible for
+        /// the root viewmodel but next to invisible for everyone else...
+        /// </summary>
+        /// <param name="match"></param>
+        internal MatchType SetMatch(MatchType match)
+        {
+            this.Match = match;
+
+            return match;
+        }
+
+        /// <summary>
+        /// Add a child item including a reference to a backupnode
+        /// (add to backupnode is determined by <paramref name="bAddBackup"/>).
+        /// </summary>
+        /// <param name="child"></param>
+        /// <param name="bAddBackup"></param>
+        private void ChildrenAdd(MetaLocationViewModel child, bool bAddBackup = true)
+        {
+            if (HasDummyChild == true)
+            {
+                Application.Current.Dispatcher.Invoke(() => { _Children.Clear(); }, _ChildrenEditPrio);
+            }
+
+            Application.Current.Dispatcher.Invoke(() => { _Children.Add(child); }, _ChildrenEditPrio);
+
+            if (bAddBackup == true)
+                _BackUpNodes.Add(child);
+        }
+
+        /// <summary>
+        /// Add a child node to a backupnode only.
+        /// </summary>
+        /// <param name="child"></param>
+        private void ChildrenAddBackupNodes(MetaLocationViewModel child)
+        {
+            _BackUpNodes.Add(child);
+        }
+
+        private void ChildrenRemove(MetaLocationViewModel child, bool bRemoveBackup = true)
+        {
+            Application.Current.Dispatcher.Invoke(() => { _Children.Remove(child); }, _ChildrenEditPrio);
+
+            if (bRemoveBackup == true)
+                _BackUpNodes.Remove(child);
         }
         #endregion methods
     }

@@ -46,9 +46,9 @@ namespace FilterTreeViewVis.ViewModels
 
         #region properties
         /// <summary>
-        /// Gets all root viewmodel that can be bound to a treeview
+        /// Gets the root viewmodel that can be bound to a treeview control.
         /// </summary>
-        public new TestLocationRootViewModel Root
+        public TestLocationRootViewModel Root
         {
             get
             {

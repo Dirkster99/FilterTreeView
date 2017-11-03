@@ -117,7 +117,7 @@
                         <Image Source="{Binding TypeOfLocation,Converter={StaticResource LocationTypeToImageConverter}}"
                                Width="16"/>
 
-                        <TextBlock Text="{Binding LocalName}" Margin="5,0,0,0" >
+                        <TextBlock Text="{Binding LocalName,Mode=OneTime}" Margin="5,0,0,0" >
                             <TextBlock.ToolTip>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -132,13 +132,13 @@
                                     </Grid.RowDefinitions>
 
                                     <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right">ID:</TextBlock>
-                                    <TextBlock Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" Text="{Binding ID}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" Text="{Binding ID,Mode=OneTime}"/>
 
                                     <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right">Latitude:</TextBlock>
-                                    <TextBlock Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Text="{Binding Latitude}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Text="{Binding Latitude,Mode=OneTime}"/>
 
                                     <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right">Longitude:</TextBlock>
-                                    <TextBlock Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" Text="{Binding Longitude}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" Text="{Binding Longitude,Mode=OneTime}"/>
                                 </Grid>
                             </TextBlock.ToolTip>
                             </TextBlock>
@@ -147,7 +147,7 @@
             </TreeView.ItemTemplate>
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
-                    <Setter Property="behav:TreeViewItemExpanded.Command" Value="{Binding Path=Data.ExpandCommand, Source={StaticResource DataContextProxy}}" />
+                    <Setter Property="behav:TreeViewItemExpanded.Command" Value="{Binding Path=Data.ExpandCommand, Source={StaticResource DataContextProxy},Mode=OneTime}" />
                     <Setter Property="IsExpanded" Value="{Binding IsItemExpanded, Mode=TwoWay}" />
                     <!--Setter Property="Visibility" Value="{Binding IsItemVisible, Mode=OneWay, Converter={StaticResource boolToVisibilityConverter}}" / -->
                 </Style>

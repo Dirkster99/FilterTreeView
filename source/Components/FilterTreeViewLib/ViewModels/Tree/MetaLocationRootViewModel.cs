@@ -184,7 +184,7 @@
                 if (token.IsCancellationRequested == true)
                     return 0;
 
-                rootItem.Match = MatchType.NoMatch;
+                rootItem.SetMatch(MatchType.NoMatch);
 
                 // Match children of this root item
                 var nodeMatchCount = MatchNodes(rootItem, searchParams);
@@ -195,16 +195,16 @@
                 // parent and children below
                 if (searchParams.MatchSearchString(rootItem.LocalName) == true)
                 {
-                    rootItem.Match = MatchType.NodeMatch;
+                    rootItem.SetMatch(MatchType.NodeMatch);
                     imatchCount++;
                 }
 
                 if (nodeMatchCount > 0)
                 {
                     if (rootItem.Match == MatchType.NodeMatch)
-                        rootItem.Match = MatchType.Node_AND_SubNodeMatch;
+                        rootItem.SetMatch(MatchType.Node_AND_SubNodeMatch);
                     else
-                        rootItem.Match = MatchType.SubNodeMatch;
+                        rootItem.SetMatch(MatchType.SubNodeMatch);
                 }
 
                 // Determine wether root item should visible and expanded or not
@@ -286,7 +286,7 @@
                 }
 
                 // Process Node and count matches (if any)
-                if ((node.Match = node.ProcessNodeMatch(searchParams)) == MatchType.NodeMatch)
+                if ((node.SetMatch(node.ProcessNodeMatch(searchParams))) == MatchType.NodeMatch)
                     MatchCount++;
 
                 if (node.Match == MatchType.SubNodeMatch ||
