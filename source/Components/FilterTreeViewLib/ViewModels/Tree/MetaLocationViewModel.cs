@@ -250,6 +250,15 @@
             return result;
         }
 
+/// <summary>
+/// The TREELIB (see FilterTreeViewLib (Project) > Properties > Conditional Compilation Symbol)
+/// switch determines whether the TreeLib LevelOrder traversal function is used or not.
+/// The point for training is here:
+/// 
+/// Both functions are equivalent but using the TreeLib traversal function should simplify
+/// the problem of efficiently traversing any tree in the given order.
+/// </summary>
+#if TREELIB
         /// <summary>
         /// Convert a Model into a ViewModel using
         /// a LevelOrderTraversal Algorithm
@@ -289,6 +298,48 @@
 
             return dstRoot;
         }
+#else
+        ///<summary>
+        /// Convert a Model into a ViewModel using
+        /// a LevelOrderTraversal Algorithm via TreeLib library.
+        ///</summary>
+        internal static MetaLocationViewModel GetViewModelFromModel(MetaLocationModel srcRoot)
+        {
+            MetaLocationViewModel dstRoot = null;
+
+            if (srcRoot == null)
+                return dstRoot;
+
+            var srcItems = TreeLib.BreadthFirst.Traverse.LevelOrder(srcRoot, i => i.Children);
+            var dstIdItems = new Dictionary<int, MetaLocationViewModel>();
+
+            foreach (var srcItem in srcItems)
+            {
+                var node = srcItem.Node;
+
+                if (node.Parent == null)
+                {
+                    dstRoot = new MetaLocationViewModel(node, null);
+                    dstIdItems.Add(dstRoot.ID, dstRoot);
+                }
+                else
+                {
+                    // Find parent ViewModel item for this Model item
+                    MetaLocationViewModel vmParentItem;
+                    dstIdItems.TryGetValue(node.Parent.ID, out vmParentItem);
+
+                    // Insert new ViewModel item (from Model item) below ViewModel parent
+                    var dstNode = new MetaLocationViewModel(node, vmParentItem);
+                    vmParentItem.ChildrenAdd(dstNode);
+                    dstIdItems.Add(dstNode.ID, dstNode);
+                }
+            }
+
+            dstIdItems.Clear(); // Destroy temp ID look-up structure
+
+            return dstRoot;
+        }
+#endif
 
         /// <summary>
         /// Re-load treeview items below the root item.
@@ -432,6 +483,6 @@
             if (bRemoveBackup == true)
                 _BackUpNodes.Remove(child);
         }
-        #endregion methods
+#endregion methods
     }
 }
