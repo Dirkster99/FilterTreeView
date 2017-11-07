@@ -305,18 +305,15 @@
         ///</summary>
         internal static MetaLocationViewModel GetViewModelFromModel(MetaLocationModel srcRoot)
         {
-            MetaLocationViewModel dstRoot = null;
-
             if (srcRoot == null)
-                return dstRoot;
+                return null;
 
             var srcItems = TreeLib.BreadthFirst.Traverse.LevelOrder(srcRoot, i => i.Children);
             var dstIdItems = new Dictionary<int, MetaLocationViewModel>();
+            MetaLocationViewModel dstRoot = null;
 
-            foreach (var srcItem in srcItems)
+            foreach (var node in srcItems.Select(i => i.Node))
             {
-                var node = srcItem.Node;
-
                 if (node.Parent == null)
                 {
                     dstRoot = new MetaLocationViewModel(node, null);
@@ -324,13 +321,11 @@
                 }
                 else
                 {
-                    // Find parent ViewModel item for this Model item
-                    MetaLocationViewModel vmParentItem;
+                    MetaLocationViewModel vmParentItem;     // Find parent ViewModel for Model
                     dstIdItems.TryGetValue(node.Parent.ID, out vmParentItem);
 
-                    // Insert new ViewModel item (from Model item) below ViewModel parent
                     var dstNode = new MetaLocationViewModel(node, vmParentItem);
-                    vmParentItem.ChildrenAdd(dstNode);
+                    vmParentItem.ChildrenAdd(dstNode);     // Insert converted ViewModel below ViewModel parent
                     dstIdItems.Add(dstNode.ID, dstNode);
                 }
             }
