@@ -56,7 +56,7 @@
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="TreeLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Dirkster.TreeLib.1.0.0\lib\netstandard1.6\TreeLib.dll</HintPath>
+      <HintPath>..\packages\Dirkster.TreeLib.1.0.3\lib\net40\TreeLib.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
