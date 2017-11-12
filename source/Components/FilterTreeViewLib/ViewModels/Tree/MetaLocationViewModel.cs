@@ -250,15 +250,51 @@
             return result;
         }
 
-/// <summary>
-/// The TREELIB (see FilterTreeViewLib (Project) > Properties > Conditional Compilation Symbol)
-/// switch determines whether the TreeLib LevelOrder traversal function is used or not.
-/// The point for training is here:
-/// 
-/// Both functions are equivalent but using the TreeLib traversal function should simplify
-/// the problem of efficiently traversing any tree in the given order.
-/// </summary>
+        /// <summary>
+        /// The TREELIB (see FilterTreeViewLib (Project) > Properties > Conditional Compilation Symbol)
+        /// switch determines whether the TreeLib LevelOrder traversal function is used or not.
+        /// The point for training is here:
+        /// 
+        /// Both functions are equivalent but using the TreeLib traversal function should simplify
+        /// the problem of efficiently traversing any tree in the given order.
+        /// </summary>
 #if TREELIB
+        ///<summary>
+        /// Convert a Model into a ViewModel using
+        /// a LevelOrderTraversal Algorithm via TreeLib library.
+        ///</summary>
+        internal static MetaLocationViewModel GetViewModelFromModel(MetaLocationModel srcRoot)
+        {
+            if (srcRoot == null)
+                return null;
+
+            var srcItems = TreeLib.BreadthFirst.Traverse.LevelOrder(srcRoot, i => i.Children);
+            var dstIdItems = new Dictionary<int, MetaLocationViewModel>();
+            MetaLocationViewModel dstRoot = null;
+
+            foreach (var node in srcItems.Select(i => i.Node))
+            {
+                if (node.Parent == null)
+                {
+                    dstRoot = new MetaLocationViewModel(node, null);
+                    dstIdItems.Add(dstRoot.ID, dstRoot);
+                }
+                else
+                {
+                    MetaLocationViewModel vmParentItem;     // Find parent ViewModel for Model
+                    dstIdItems.TryGetValue(node.Parent.ID, out vmParentItem);
+
+                    var dstNode = new MetaLocationViewModel(node, vmParentItem);
+                    vmParentItem.ChildrenAdd(dstNode);     // Insert converted ViewModel below ViewModel parent
+                    dstIdItems.Add(dstNode.ID, dstNode);
+                }
+            }
+
+            dstIdItems.Clear(); // Destroy temp ID look-up structure
+
+            return dstRoot;
+        }
+#else
         /// <summary>
         /// Convert a Model into a ViewModel using
         /// a LevelOrderTraversal Algorithm
@@ -295,42 +331,6 @@
                     dstQueue.Enqueue(dstVM);
                 }
             }
-
-            return dstRoot;
-        }
-#else
-        ///<summary>
-        /// Convert a Model into a ViewModel using
-        /// a LevelOrderTraversal Algorithm via TreeLib library.
-        ///</summary>
-        internal static MetaLocationViewModel GetViewModelFromModel(MetaLocationModel srcRoot)
-        {
-            if (srcRoot == null)
-                return null;
-
-            var srcItems = TreeLib.BreadthFirst.Traverse.LevelOrder(srcRoot, i => i.Children);
-            var dstIdItems = new Dictionary<int, MetaLocationViewModel>();
-            MetaLocationViewModel dstRoot = null;
-
-            foreach (var node in srcItems.Select(i => i.Node))
-            {
-                if (node.Parent == null)
-                {
-                    dstRoot = new MetaLocationViewModel(node, null);
-                    dstIdItems.Add(dstRoot.ID, dstRoot);
-                }
-                else
-                {
-                    MetaLocationViewModel vmParentItem;     // Find parent ViewModel for Model
-                    dstIdItems.TryGetValue(node.Parent.ID, out vmParentItem);
-
-                    var dstNode = new MetaLocationViewModel(node, vmParentItem);
-                    vmParentItem.ChildrenAdd(dstNode);     // Insert converted ViewModel below ViewModel parent
-                    dstIdItems.Add(dstNode.ID, dstNode);
-                }
-            }
-
-            dstIdItems.Clear(); // Destroy temp ID look-up structure
 
             return dstRoot;
         }
