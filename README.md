@@ -3,6 +3,13 @@
 # FilterTreeView
 This is a WPF/MVVM Search and Filter TreeView Reference Application
 
+See Codeproject article <a hre="https://www.codeproject.com/Articles/1213031/Advanced-WPF-TreeViews-Part-of-n>Advanced WPF TreeViews Part 3 of n</a> for more details.
+
+# TreeLib
+See also <a hre="https://github.com/Dirkster99/TreeLib">TreeLib</a> project for Tree Traversal methods used in this project.
+
+<img src="https://www.codeproject.com/KB/WPF/1213031/FilterTreeViewScreenshot.png"/>
+
 ## City Search (String is contained):
 
 * 48 Washington
