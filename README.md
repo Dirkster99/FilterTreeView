@@ -3,7 +3,11 @@
 # FilterTreeView
 This is a WPF/MVVM Search and Filter TreeView Reference Application
 
-See Codeproject article <a href="https://www.codeproject.com/Articles/1213031/Advanced-WPF-TreeViews-Part-of-n">Advanced WPF TreeViews Part 3 of n</a> for more details or watch a <a href="https://youtu.be/AVqIU4gAxWQ">screen captured video on youtube</a>.
+See Codeproject articles:
+* <a href="https://www.codeproject.com/Articles/1213031/Advanced-WPF-TreeViews-Part-of-n">Advanced WPF TreeViews Part 3 of n</a>
+* <a href="https://www.codeproject.com/Articles/1217419/A-Highlightable-WPF-MVVM-TextBlock">A Highlightable WPF/MVVM TextBlock</a>
+
+for more details or watch a <a href="https://youtu.be/AVqIU4gAxWQ">screen captured video on youtube</a>.
 
 # TreeLib
 See also <a href="https://github.com/Dirkster99/TreeLib">TreeLib</a> project for Tree Traversal methods used in this project.
