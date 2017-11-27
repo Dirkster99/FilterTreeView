@@ -279,7 +279,8 @@
                 }
 
                 // Process Node and count matches (if any)
-                if ((node.Match = node.ProcessNodeMatch(searchParams)) == MatchType.NodeMatch)
+                int offset = -1;
+                if ((node.Match = node.ProcessNodeMatch(searchParams, out offset)) == MatchType.NodeMatch)
                     MatchCount++;
 
                 if (node.Match == MatchType.SubNodeMatch ||

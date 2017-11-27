@@ -74,7 +74,7 @@
         /// </summary>
         /// <param name="stringToFind"></param>
         /// <returns>true if <paramref name="stringToFind"/>is a match, otherwise false</returns>
-        public bool MatchSearchString(string stringToFind)
+        public int MatchSearchString(string stringToFind)
         {
             stringToFind = (stringToFind == null ? string.Empty : stringToFind);
 
@@ -83,15 +83,19 @@
             switch (Match)
             {
                 case Enums.SearchMatch.StringIsContained:
-                    return stringToFind.Contains(SearchString);
+                    return stringToFind.IndexOf(SearchString);
 
                 case Enums.SearchMatch.StringIsMatched:
-                    return SearchString == stringToFind;
+                    if (SearchString == stringToFind)
+                        return 0;
+                    break;
 
                 default:
                     throw new System.ArgumentOutOfRangeException(
                         string.Format("Internal Error: Search option '{0}' not implemented.", Match));
             }
+
+            return -1;
         }
 
         /// <summary>

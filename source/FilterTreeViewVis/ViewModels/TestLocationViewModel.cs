@@ -288,12 +288,13 @@
         /// </summary>
         /// <param name="node"></param>
         /// <param name="filterString"></param>
-        public MatchType ProcessNodeMatch(SearchParams searchParams)
+        public MatchType ProcessNodeMatch(SearchParams searchParams, out int offset)
         {
+            offset = -1;
             MatchType matchThisNode = MatchType.NoMatch;
 
             // Determine whether this node is a match or not
-            if (searchParams.MatchSearchString(LocalName) == true)
+            if ((offset = searchParams.MatchSearchString(LocalName)) > 0)
                 matchThisNode = MatchType.NodeMatch;
 
             //ChildrenClear(false);

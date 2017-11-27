@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterTreeView", "FilterTreeView\FilterTreeView.csproj", "{9668A53D-608F-46B1-926C-14AC52CD35AE}"
 EndProject
@@ -9,8 +9,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterTreeViewLib", "Components\FilterTreeViewLib\FilterTreeViewLib.csproj", "{C5030463-0469-4AFA-92F4-F6B55A6B4C89}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", "{F0EEB4AD-6E8F-47AC-BE12-98A0A15ABD95}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterTreeViewVis", "FilterTreeViewVis\FilterTreeViewVis.csproj", "{31D900E1-FB7C-488B-A740-1A11DBFB7F0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,10 +28,6 @@ Global
 		{C5030463-0469-4AFA-92F4-F6B55A6B4C89}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5030463-0469-4AFA-92F4-F6B55A6B4C89}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5030463-0469-4AFA-92F4-F6B55A6B4C89}.Release|Any CPU.Build.0 = Release|Any CPU
-		{31D900E1-FB7C-488B-A740-1A11DBFB7F0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{31D900E1-FB7C-488B-A740-1A11DBFB7F0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{31D900E1-FB7C-488B-A740-1A11DBFB7F0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{31D900E1-FB7C-488B-A740-1A11DBFB7F0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

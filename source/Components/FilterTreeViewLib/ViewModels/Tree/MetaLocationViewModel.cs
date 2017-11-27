@@ -2,12 +2,14 @@
 {
     using BusinessLib.Models;
     using FilterTreeViewLib.Interfaces;
+    using FilterTreeViewLib.ViewModels.Tree.Search;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels.Enums;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Windows;
+    using System.Windows.Media;
     using System.Windows.Threading;
 
     /// <summary>
@@ -16,17 +18,17 @@
     public class MetaLocationViewModel : Base.BaseViewModel, IHasDummyChild
     {
         #region fields
-        private static DispatcherPriority _ChildrenEditPrio = DispatcherPriority.DataBind;
+        private static DispatcherPriority _ChildrenEditPrio = DispatcherPriority.Render;
 
         private static readonly MetaLocationViewModel DummyChild = new MetaLocationViewModel();
 
-////        private bool _IsItemVisible;
         private bool _IsItemExpanded;
         private List<MetaLocationViewModel> _BackUpNodes = null;
 
         private readonly ObservableCollection<MetaLocationViewModel> _Children = null;
         private MatchType _Match;
         private string _LocalName;
+        private ISelectionRange _Range = null;
         #endregion fields
 
         #region constructors
@@ -55,7 +57,7 @@
         /// </summary>
         protected MetaLocationViewModel()
         {
-////            _IsItemVisible = true;
+            ////            _IsItemVisible = true;
             _IsItemExpanded = false;
 
             _Children = new ObservableCollection<MetaLocationViewModel>();
@@ -91,22 +93,40 @@
             }
         }
 
-////        /// <summary>
-////        /// Gets/sets whether this item is visible in
-////        /// the tree view, or not.
-////        /// </summary>
-////        public bool IsItemVisible
-////        {
-////            get { return _IsItemVisible; }
-////            set
-////            {
-////                if (_IsItemVisible != value)
-////                {
-////                    _IsItemVisible = value;
-////                    NotifyPropertyChanged(() => IsItemVisible);
-////                }
-////            }
-////        }
+        /// <summary>
+        /// Gets the range property that indicates the text range
+        /// to be considered a match against another (search) string.
+        /// </summary>
+        public ISelectionRange Range
+        {
+            get
+            {
+                return _Range;
+            }
+
+            private set
+            {
+                if (_Range != null && value != null)
+                {
+                    // Nothing changed - so we change nothing here :-)
+                    if (_Range.Start == value.Start &&
+                        _Range.End == value.End &&
+                        _Range.SelectionBackground == value.SelectionBackground &&
+                        _Range.SelectionBackground == value.SelectionBackground)
+                        return;
+
+                    _Range = (ISelectionRange)value.Clone();
+                    NotifyPropertyChanged(() => Range);
+                }
+
+                if (_Range == null && value != null ||
+                    _Range != null && value == null)
+                {
+                    _Range = (ISelectionRange)value.Clone();
+                    NotifyPropertyChanged(() => Range);
+                }
+            }
+        }
 
         /// <summary>
         /// Gets/sets whether this item is expanded in
@@ -356,16 +376,22 @@
         internal void ChildrenClear(bool bClearBackup = true
                                 , bool bAddDummyChild = true)
         {
-            Application.Current.Dispatcher.Invoke(() => { _Children.Clear(); }, _ChildrenEditPrio);
-
-            // Cities do not have children so we need no dummy child here
-            if (bAddDummyChild == true && TypeOfLocation != LocationType.City)
+            try
             {
-                Application.Current.Dispatcher.Invoke(() => { _Children.Add(DummyChild); }, _ChildrenEditPrio);
-            }
+                Application.Current.Dispatcher.Invoke(() => { _Children.Clear(); }, _ChildrenEditPrio);
 
-            if (bClearBackup == true)
-                _BackUpNodes.Clear();
+                // Cities do not have children so we need no dummy child here
+                if (bAddDummyChild == true && TypeOfLocation != LocationType.City)
+                {
+                    Application.Current.Dispatcher.Invoke(() => { _Children.Add(DummyChild); }, _ChildrenEditPrio);
+                }
+
+                if (bClearBackup == true)
+                    _BackUpNodes.Clear();
+            }
+            catch
+            {
+            }
         }
 
         /// <summary>
@@ -374,12 +400,13 @@
         /// </summary>
         /// <param name="node"></param>
         /// <param name="filterString"></param>
-        internal MatchType ProcessNodeMatch(SearchParams searchParams)
+        internal MatchType ProcessNodeMatch(SearchParams searchParams, out int MatchStart)
         {
+            MatchStart = -1;
             MatchType matchThisNode = MatchType.NoMatch;
 
             // Determine whether this node is a match or not
-            if (searchParams.MatchSearchString(LocalName) == true)
+            if ((MatchStart = searchParams.MatchSearchString(LocalName)) >= 0)
                 matchThisNode = MatchType.NodeMatch;
 
             ChildrenClear(false);
@@ -436,9 +463,13 @@
         /// the root viewmodel but next to invisible for everyone else...
         /// </summary>
         /// <param name="match"></param>
-        internal MatchType SetMatch(MatchType match)
+        /// <param name="matchStart"></param>
+        internal MatchType SetMatch(MatchType match,
+                                    int matchStart = -1,
+                                    int matchEnd = -1)
         {
             this.Match = match;
+            this.Range = new SelectionRange(matchStart, matchEnd);
 
             return match;
         }
@@ -451,15 +482,21 @@
         /// <param name="bAddBackup"></param>
         private void ChildrenAdd(MetaLocationViewModel child, bool bAddBackup = true)
         {
-            if (HasDummyChild == true)
+            try
             {
-                Application.Current.Dispatcher.Invoke(() => { _Children.Clear(); }, _ChildrenEditPrio);
+                if (HasDummyChild == true)
+                {
+                    Application.Current.Dispatcher.Invoke(() => { _Children.Clear(); }, _ChildrenEditPrio);
+                }
+
+                Application.Current.Dispatcher.Invoke(() => { _Children.Add(child); }, _ChildrenEditPrio);
+
+                if (bAddBackup == true)
+                    _BackUpNodes.Add(child);
             }
-
-            Application.Current.Dispatcher.Invoke(() => { _Children.Add(child); }, _ChildrenEditPrio);
-
-            if (bAddBackup == true)
-                _BackUpNodes.Add(child);
+            catch
+            {
+            }
         }
 
         /// <summary>

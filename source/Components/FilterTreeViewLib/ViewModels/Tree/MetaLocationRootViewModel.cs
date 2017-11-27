@@ -193,24 +193,25 @@
 
                 // Match this root item and find correct match type between
                 // parent and children below
-                if (searchParams.MatchSearchString(rootItem.LocalName) == true)
+                int offset = -1;
+                if ((offset = searchParams.MatchSearchString(rootItem.LocalName)) >= 0)
                 {
-                    rootItem.SetMatch(MatchType.NodeMatch);
+                    rootItem.SetMatch(MatchType.NodeMatch, offset, offset+searchParams.SearchString.Length);
                     imatchCount++;
                 }
 
                 if (nodeMatchCount > 0)
                 {
                     if (rootItem.Match == MatchType.NodeMatch)
-                        rootItem.SetMatch(MatchType.Node_AND_SubNodeMatch);
+                        rootItem.SetMatch(MatchType.Node_AND_SubNodeMatch, offset, offset + searchParams.SearchString.Length);
                     else
                         rootItem.SetMatch(MatchType.SubNodeMatch);
                 }
 
-                // Determine wether root item should visible and expanded or not
+                // Determine wether root item should be visible and expanded or not
                 if (rootItem.Match != MatchType.NoMatch)
                 {
-                    if ((rootItem.Match & MatchType.SubNodeMatch) != 0)
+                    if ((rootItem.Match & (MatchType.SubNodeMatch | MatchType.Node_AND_SubNodeMatch)) != 0)
                         rootItem.SetExpand(true);
                     else
                         rootItem.SetExpand(false);
@@ -286,7 +287,12 @@
                 }
 
                 // Process Node and count matches (if any)
-                if ((node.SetMatch(node.ProcessNodeMatch(searchParams))) == MatchType.NodeMatch)
+                int matchStart = -1;
+                MatchType match = MatchType.NoMatch;
+                match = node.ProcessNodeMatch(searchParams, out matchStart);
+                node.SetMatch(match, matchStart, matchStart+ searchParams.SearchString.Length);
+
+                if (node.Match == MatchType.NodeMatch)
                     MatchCount++;
 
                 if (node.Match == MatchType.SubNodeMatch ||

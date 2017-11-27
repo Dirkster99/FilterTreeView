@@ -9,7 +9,6 @@ ECHO.
 ECHO Components\BusinessLib
 ECHO Components\FilterTreeViewLib
 ECHO FilterTreeView
-ECHO FilterTreeViewVis
 ECHO.
 REM Ask the user if hes really sure to continue beyond this point XXXXXXXX
 set /p choice=Are you sure to continue (Y/N)?
@@ -41,12 +40,6 @@ ECHO Deleting BIN and OBJ Folders in FilterTreeView
 ECHO.
 RMDIR /S /Q ".\FilterTreeView\bin"
 RMDIR /S /Q ".\FilterTreeView\obj"
-
-ECHO.
-ECHO Deleting BIN and OBJ Folders in FilterTreeViewRxVis
-ECHO.
-RMDIR /S /Q ".\FilterTreeViewVis\bin"
-RMDIR /S /Q ".\FilterTreeViewVis\obj"
 
 PAUSE
 
