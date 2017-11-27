@@ -6,21 +6,26 @@ This is a WPF/MVVM Search and Filter TreeView Reference Application
 See Codeproject article <a href="https://www.codeproject.com/Articles/1213031/Advanced-WPF-TreeViews-Part-of-n">Advanced WPF TreeViews Part 3 of n</a> for more details or watch a <a href="https://youtu.be/AVqIU4gAxWQ">screen captured video on youtube</a>.
 
 # TreeLib
-See also <a hre="https://github.com/Dirkster99/TreeLib">TreeLib</a> project for Tree Traversal methods used in this project.
+See also <a href="https://github.com/Dirkster99/TreeLib">TreeLib</a> project for Tree Traversal methods used in this project.
 
-<img src="https://www.codeproject.com/KB/WPF/1213031/FilterTreeViewScreenshot.png"/>
+<img src="https://github.com/Dirkster99/Docu/blob/master/FilterTreeView/FilterTreeView_Screenshot.png?raw=true"/>
 
 ## City Search (String is contained):
 
-* 48 Washington
-* 22 Holland
-* 29 Paris
-* 23 London
-* 15 Brighton
-* 11 Hamburg
-* 10 Bremen
-* 14 Francisco
-* &nbsp;9 Madrid
-* &nbsp;7 Liverpool
-* &nbsp;7 Amsterdam
-* &nbsp;3 Muenster
+* 781 Saint
+* 267 los
+* &nbsp;48 Washington
+* &nbsp;32 Berlin
+* &nbsp;22 Holland
+* &nbsp;29 Paris
+* &nbsp;23 London
+* &nbsp;15 Brighton
+* &nbsp;11 Hamburg
+* &nbsp;10 Bremen
+* &nbsp;17 Kiel
+* &nbsp;14 Francisco
+* &nbsp;&nbsp;9 Madrid
+* &nbsp;&nbsp;7 Liverpool
+* &nbsp;&nbsp;7 Amsterdam
+* &nbsp;&nbsp;7 Australia
+* &nbsp;&nbsp;3 Muenster
