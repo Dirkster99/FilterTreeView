@@ -8,7 +8,7 @@ See Codeproject article <a href="https://www.codeproject.com/Articles/1213031/Ad
 # TreeLib
 See also <a hre="https://github.com/Dirkster99/TreeLib">TreeLib</a> project for Tree Traversal methods used in this project.
 
-<img src="https://www.codeproject.com/KB/WPF/1213031/FilterTreeViewScreenshot.png"/>
+<img src="https://github.com/Dirkster99/Docu/blob/master/FilterTreeView/FilterTreeView_Screenshot.png?raw=true"/>
 
 ## City Search (String is contained):
 
