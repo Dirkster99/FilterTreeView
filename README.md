@@ -9,7 +9,7 @@ See Codeproject articles:
 
 for more details or watch a <a href="https://youtu.be/AVqIU4gAxWQ">screen captured video on youtube</a>.
 
-# TreeLib
+## TreeLib
 See also <a href="https://github.com/Dirkster99/TreeLib">TreeLib</a> project for Tree Traversal methods used in this project.
 
 <img src="https://github.com/Dirkster99/Docu/blob/master/FilterTreeView/FilterTreeView_Screenshot.png?raw=true"/>
