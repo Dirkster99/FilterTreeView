@@ -1,12 +1,11 @@
 ﻿namespace FilterTreeView.ViewModels
 {
+    using FilterTreeView.Tasks;
     using FilterTreeViewLib.ViewModels;
     using FilterTreeViewLib.ViewModels.Base;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels.Enums;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows.Input;
@@ -18,12 +17,10 @@
     internal class AppViewModel : FilterTreeViewLib.ViewModels.AppBaseViewModel
     {
         #region fields
+        private readonly OneTaskLimitedScheduler _myTaskScheduler;
         private readonly MetaLocationRootViewModel _Root;
 
         private ICommand _SearchCommand;
-
-        private Dictionary<string, CancellationTokenSource> _Queue = null;
-        private static SemaphoreSlim SlowStuffSemaphore = null;
         #endregion fields
 
         #region constructors
@@ -33,10 +30,8 @@
         public AppViewModel()
             : base()
         {
+            _myTaskScheduler = new OneTaskLimitedScheduler();
             _Root = new MetaLocationRootViewModel();
-
-            _Queue = new Dictionary<string, CancellationTokenSource>();
-            SlowStuffSemaphore = new SemaphoreSlim(1, 1);
         }
         #endregion constructors
 
@@ -119,14 +114,8 @@
         /// </summary>
         protected async Task<int> SearchCommand_ExecutedAsync(string findThis)
         {
-            // Cancel current task(s) if there is any...
-            var queueList = _Queue.Values.ToList();
-
-            for (int i = 0; i < queueList.Count; i++)
-                queueList[i].Cancel();
-
+            // Provide Cancel method ...
             var tokenSource = new CancellationTokenSource();
-            _Queue.Add(findThis, tokenSource);
 
             // Setup search parameters
             SearchParams param = new SearchParams(findThis
@@ -134,20 +123,15 @@
                     SearchMatch.StringIsContained : SearchMatch.StringIsMatched));
 
             // Make sure the task always processes the last input but is not started twice
-            await SlowStuffSemaphore.WaitAsync();
             try
             {
                 IsProcessing = true;
 
-                // There is more recent input to process so we ignore this one
-                if (_Queue.Count > 1)
-                {
-                    _Queue.Remove(findThis);
-                    return 0;
-                }
-
                 // Do the search and return number of results as int
-                CountSearchMatches = await Root.DoSearchAsync(param, tokenSource.Token);
+                // CountSearchMatches = await Root.DoSearchAsync(param, tokenSource.Token);
+                CountSearchMatches = await Task.Factory.StartNew<int>(
+                    () => Root.DoSearch(param, tokenSource.Token),
+                    tokenSource.Token, TaskCreationOptions.None, _myTaskScheduler);
 
                 this.StatusStringResult = findThis;
                 return CountSearchMatches;
@@ -158,9 +142,7 @@
             }
             finally
             {
-                _Queue.Remove(findThis);
                 IsProcessing = false;
-                SlowStuffSemaphore.Release();
             }
 
             return -1;
