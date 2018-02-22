@@ -1,12 +1,11 @@
 ﻿namespace FilterTreeView.ViewModels
 {
+    using FilterTreeView.Tasks;
     using FilterTreeViewLib.ViewModels;
     using FilterTreeViewLib.ViewModels.Base;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels;
     using FilterTreeViewLib.ViewModelsSearch.SearchModels.Enums;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows.Input;
@@ -15,15 +14,15 @@
     /// Implements the application viewmodel object that manages all main commands
     /// and bindings visible in the main window.
     /// </summary>
-    internal class AppViewModel : FilterTreeViewLib.ViewModels.AppBaseViewModel
+    internal class AppViewModel : FilterTreeViewLib.ViewModels.AppBaseViewModel, IDisposable
     {
         #region fields
+        private readonly OneTaskProcessor _procesor;
+
         private readonly MetaLocationRootViewModel _Root;
 
         private ICommand _SearchCommand;
-
-        private Dictionary<string, CancellationTokenSource> _Queue = null;
-        private static SemaphoreSlim SlowStuffSemaphore = null;
+        private bool _Disposed;
         #endregion fields
 
         #region constructors
@@ -33,10 +32,9 @@
         public AppViewModel()
             : base()
         {
+            _procesor = new OneTaskProcessor();
             _Root = new MetaLocationRootViewModel();
-
-            _Queue = new Dictionary<string, CancellationTokenSource>();
-            SlowStuffSemaphore = new SemaphoreSlim(1, 1);
+            _Disposed = false;
         }
         #endregion constructors
 
@@ -88,6 +86,14 @@
 
         #region methods
         /// <summary>
+        /// Implements the <see cref="IDisposable"/> interface.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        /// <summary>
         /// Loads the initial sample data from XML file into memory
         /// </summary>
         /// <returns></returns>
@@ -119,37 +125,23 @@
         /// </summary>
         protected async Task<int> SearchCommand_ExecutedAsync(string findThis)
         {
-            // Cancel current task(s) if there is any...
-            var queueList = _Queue.Values.ToList();
-
-            for (int i = 0; i < queueList.Count; i++)
-                queueList[i].Cancel();
-
-            var tokenSource = new CancellationTokenSource();
-            _Queue.Add(findThis, tokenSource);
-
             // Setup search parameters
             SearchParams param = new SearchParams(findThis
                 , (IsStringContainedSearchOption == true ?
                     SearchMatch.StringIsContained : SearchMatch.StringIsMatched));
 
             // Make sure the task always processes the last input but is not started twice
-            await SlowStuffSemaphore.WaitAsync();
             try
             {
                 IsProcessing = true;
 
-                // There is more recent input to process so we ignore this one
-                if (_Queue.Count > 1)
-                {
-                    _Queue.Remove(findThis);
-                    return 0;
-                }
-
-                // Do the search and return number of results as int
-                CountSearchMatches = await Root.DoSearchAsync(param, tokenSource.Token);
+                var tokenSource = new CancellationTokenSource();
+                Func<int> a = new Func<int> (() => Root.DoSearch(param, tokenSource.Token));
+                var t = await _procesor.ExecuteOneTask(a, tokenSource);
 
                 this.StatusStringResult = findThis;
+                CountSearchMatches = t;
+
                 return CountSearchMatches;
             }
             catch (Exception exp)
@@ -158,12 +150,28 @@
             }
             finally
             {
-                _Queue.Remove(findThis);
                 IsProcessing = false;
-                SlowStuffSemaphore.Release();
             }
 
             return -1;
+        }
+
+
+        /// <summary>
+        /// The bulk of the clean-up code is implemented here.
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_Disposed == false)
+            {
+                if (disposing == true)
+                {
+                    _procesor.Dispose();
+                }
+
+                _Disposed = true;
+            }
         }
         #endregion methods
     }

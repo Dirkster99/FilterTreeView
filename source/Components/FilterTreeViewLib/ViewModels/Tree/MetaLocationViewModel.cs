@@ -9,7 +9,6 @@
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Windows;
-    using System.Windows.Media;
     using System.Windows.Threading;
 
     /// <summary>
@@ -18,7 +17,7 @@
     public class MetaLocationViewModel : Base.BaseViewModel, IHasDummyChild
     {
         #region fields
-        private static DispatcherPriority _ChildrenEditPrio = DispatcherPriority.Render;
+        private static DispatcherPriority _ChildrenEditPrio = DispatcherPriority.Normal;
 
         private static readonly MetaLocationViewModel DummyChild = new MetaLocationViewModel();
 
@@ -378,13 +377,15 @@
         {
             try
             {
-                Application.Current.Dispatcher.Invoke(() => { _Children.Clear(); }, _ChildrenEditPrio);
-
-                // Cities do not have children so we need no dummy child here
-                if (bAddDummyChild == true && TypeOfLocation != LocationType.City)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    Application.Current.Dispatcher.Invoke(() => { _Children.Add(DummyChild); }, _ChildrenEditPrio);
-                }
+                    _Children.Clear();
+
+                    // Cities do not have children so we need no dummy child here
+                    if (bAddDummyChild == true && TypeOfLocation != LocationType.City)
+                        _Children.Add(DummyChild);
+
+                }, _ChildrenEditPrio);
 
                 if (bClearBackup == true)
                     _BackUpNodes.Clear();

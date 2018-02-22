@@ -56,7 +56,7 @@
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="TreeLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Dirkster.TreeLib.1.0.3\lib\net40\TreeLib.dll</HintPath>
+      <HintPath>..\packages\Dirkster.TreeLib.1.1.0\lib\net40\TreeLib.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -67,6 +67,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Tasks\OneTaskLimitedScheduler.cs" />
+    <Compile Include="Tasks\OneTaskProcessor.cs" />
     <Compile Include="ViewModels\AppViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
