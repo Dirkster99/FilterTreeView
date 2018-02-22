@@ -14,13 +14,15 @@
     /// Implements the application viewmodel object that manages all main commands
     /// and bindings visible in the main window.
     /// </summary>
-    internal class AppViewModel : FilterTreeViewLib.ViewModels.AppBaseViewModel
+    internal class AppViewModel : FilterTreeViewLib.ViewModels.AppBaseViewModel, IDisposable
     {
         #region fields
-        private readonly OneTaskLimitedScheduler _myTaskScheduler;
+        private readonly OneTaskProcessor _procesor;
+
         private readonly MetaLocationRootViewModel _Root;
 
         private ICommand _SearchCommand;
+        private bool _Disposed;
         #endregion fields
 
         #region constructors
@@ -30,8 +32,9 @@
         public AppViewModel()
             : base()
         {
-            _myTaskScheduler = new OneTaskLimitedScheduler();
+            _procesor = new OneTaskProcessor();
             _Root = new MetaLocationRootViewModel();
+            _Disposed = false;
         }
         #endregion constructors
 
@@ -83,6 +86,14 @@
 
         #region methods
         /// <summary>
+        /// Implements the <see cref="IDisposable"/> interface.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        /// <summary>
         /// Loads the initial sample data from XML file into memory
         /// </summary>
         /// <returns></returns>
@@ -114,9 +125,6 @@
         /// </summary>
         protected async Task<int> SearchCommand_ExecutedAsync(string findThis)
         {
-            // Provide Cancel method ...
-            var tokenSource = new CancellationTokenSource();
-
             // Setup search parameters
             SearchParams param = new SearchParams(findThis
                 , (IsStringContainedSearchOption == true ?
@@ -127,13 +135,13 @@
             {
                 IsProcessing = true;
 
-                // Do the search and return number of results as int
-                // CountSearchMatches = await Root.DoSearchAsync(param, tokenSource.Token);
-                CountSearchMatches = await Task.Factory.StartNew<int>(
-                    () => Root.DoSearch(param, tokenSource.Token),
-                    tokenSource.Token, TaskCreationOptions.None, _myTaskScheduler);
+                var tokenSource = new CancellationTokenSource();
+                Func<int> a = new Func<int> (() => Root.DoSearch(param, tokenSource.Token));
+                var t = await _procesor.ExecuteOneTask(a, tokenSource);
 
                 this.StatusStringResult = findThis;
+                CountSearchMatches = t;
+
                 return CountSearchMatches;
             }
             catch (Exception exp)
@@ -146,6 +154,24 @@
             }
 
             return -1;
+        }
+
+
+        /// <summary>
+        /// The bulk of the clean-up code is implemented here.
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_Disposed == false)
+            {
+                if (disposing == true)
+                {
+                    _procesor.Dispose();
+                }
+
+                _Disposed = true;
+            }
         }
         #endregion methods
     }

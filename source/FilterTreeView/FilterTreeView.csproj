@@ -68,6 +68,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Tasks\OneTaskLimitedScheduler.cs" />
+    <Compile Include="Tasks\OneTaskProcessor.cs" />
     <Compile Include="ViewModels\AppViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -10,6 +10,11 @@
     /// Task Scheduler is based on LimitedConcurrencyLevelTaskScheduler from
     /// Source:
     /// https://code.msdn.microsoft.com/windowsdesktop/Samples-for-Parallel-b4b76364
+    /// 
+    /// This scheduler ensures that only task is being executed at any time and
+    /// will clear the previously scheduled tasks (if any) before queing a new task.
+    /// 
+    /// This ensures that only the most recently queued task is processed at any time.
     /// </summary>
     public class OneTaskLimitedScheduler : TaskScheduler
     {
