@@ -8,8 +8,7 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
-    using System.Windows;
-    using System.Windows.Threading;
+    using System.Windows.Data;
 
     /// <summary>
     /// Implements an items viewmodel that should be bound to an items collection in a tree view.
@@ -17,8 +16,6 @@
     public class MetaLocationViewModel : Base.BaseViewModel, IHasDummyChild
     {
         #region fields
-        private static DispatcherPriority _ChildrenEditPrio = DispatcherPriority.Normal;
-
         private static readonly MetaLocationViewModel DummyChild = new MetaLocationViewModel();
 
         private bool _IsItemExpanded;
@@ -28,6 +25,8 @@
         private MatchType _Match;
         private string _LocalName;
         private ISelectionRange _Range = null;
+
+        private object _itemsLock = new object();
         #endregion fields
 
         #region constructors
@@ -56,10 +55,11 @@
         /// </summary>
         protected MetaLocationViewModel()
         {
-            ////            _IsItemVisible = true;
             _IsItemExpanded = false;
 
             _Children = new ObservableCollection<MetaLocationViewModel>();
+            BindingOperations.EnableCollectionSynchronization(_Children, _itemsLock);
+
             _BackUpNodes = new List<MetaLocationViewModel>();
 
             _Match = MatchType.NoMatch;
@@ -377,15 +377,14 @@
         {
             try
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                lock (_itemsLock)
                 {
                     _Children.Clear();
 
                     // Cities do not have children so we need no dummy child here
                     if (bAddDummyChild == true && TypeOfLocation != LocationType.City)
                         _Children.Add(DummyChild);
-
-                }, _ChildrenEditPrio);
+                }
 
                 if (bClearBackup == true)
                     _BackUpNodes.Clear();
@@ -487,10 +486,16 @@
             {
                 if (HasDummyChild == true)
                 {
-                    Application.Current.Dispatcher.Invoke(() => { _Children.Clear(); }, _ChildrenEditPrio);
+                    lock (_itemsLock)
+                    {
+                        _Children.Clear();
+                    }
                 }
 
-                Application.Current.Dispatcher.Invoke(() => { _Children.Add(child); }, _ChildrenEditPrio);
+                lock (_itemsLock)
+                {
+                    _Children.Add(child);
+                }
 
                 if (bAddBackup == true)
                     _BackUpNodes.Add(child);
@@ -511,11 +516,14 @@
 
         private void ChildrenRemove(MetaLocationViewModel child, bool bRemoveBackup = true)
         {
-            Application.Current.Dispatcher.Invoke(() => { _Children.Remove(child); }, _ChildrenEditPrio);
+            lock (_itemsLock)
+            {
+                _Children.Remove(child);
+            }
 
             if (bRemoveBackup == true)
                 _BackUpNodes.Remove(child);
         }
-#endregion methods
+        #endregion methods
     }
 }

@@ -8,9 +8,8 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Windows;
+    using System.Windows.Data;
     using System.Windows.Input;
-    using System.Windows.Threading;
 
     /// <summary>
     /// Implements the root viewmodel of the tree structure to be presented in a treeview.
@@ -18,12 +17,12 @@
     public class MetaLocationRootViewModel : Base.BaseViewModel
     {
         #region fields
-        private const DispatcherPriority _ChildrenEditPrio = DispatcherPriority.DataBind;
-
         protected readonly ObservableCollection<MetaLocationViewModel> _CountryRootItems = null;
         protected readonly IList<MetaLocationViewModel> _BackUpCountryRoots = null;
 
         private ICommand _ExpandCommand;
+
+        private object _itemsLock = new object();
         #endregion fields
 
         #region constructors
@@ -33,6 +32,8 @@
         public MetaLocationRootViewModel()
         {
             _CountryRootItems = new ObservableCollection<MetaLocationViewModel>();
+            BindingOperations.EnableCollectionSynchronization(_CountryRootItems, _itemsLock);
+
             _BackUpCountryRoots = new List<MetaLocationViewModel>(400);
         }
         #endregion constructors
@@ -109,14 +110,13 @@
 
             foreach (var item in isoCountries)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                lock (_itemsLock)
                 {
                     var vmItem = MetaLocationViewModel.GetViewModelFromModel(item);
 
                     RootsAdd(vmItem, true);
                     //Root.RootsAdd(vmItem, false); // Make all items initially visible
-
-                }, DispatcherPriority.ApplicationIdle);
+                }
             }
         }
 
@@ -155,7 +155,10 @@
             searchParams.SearchStringTrim();
             searchParams.SearchStringToUpperCase();
 
-            Application.Current.Dispatcher.Invoke(() => { root.Clear(); }, _ChildrenEditPrio);
+            lock (_itemsLock)
+            {
+                root.Clear();
+            }
 
             // Show all root items if string to search is empty
             if (searchParams.IsSearchStringEmpty == true ||
@@ -170,7 +173,10 @@
                     rootItem.ChildrenClear(false);
                     rootItem.SetExpand(false);
 
-                    Application.Current.Dispatcher.Invoke(() => { root.Add(rootItem); }, _ChildrenEditPrio);
+                    lock (_itemsLock)
+                    {
+                        root.Add(rootItem);
+                    }
                 }
 
                 return 0;
@@ -217,7 +223,11 @@
                         rootItem.SetExpand(false);
 
                     //Console.WriteLine("node: {0} match count: {1}", rootItem.LocalName, nodeMatchCount);
-                    Application.Current.Dispatcher.Invoke(() => { root.Add(rootItem); }, _ChildrenEditPrio);
+                    lock (_itemsLock)
+                    {
+                        root.Add(rootItem);
+                    }
+
                 }
             }
 
