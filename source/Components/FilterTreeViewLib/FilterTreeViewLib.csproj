@@ -43,8 +43,8 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="TreeLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Dirkster.TreeLib.1.1.0\lib\net40\TreeLib.dll</HintPath>
+    <Reference Include="TreeLib, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Dirkster.TreeLib.1.2.0\lib\net40\TreeLib.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
